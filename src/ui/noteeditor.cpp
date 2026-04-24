@@ -34,7 +34,7 @@
 
 namespace {
 
-constexpr auto kRichContentPrefix = "<!--qt-notes:rich-->\n";
+const QString kRichContentPrefix = QStringLiteral("<!--qt-notes:rich-->\n");
 constexpr qint64 kMaxSourceImageBytes = 20LL * 1024 * 1024;
 constexpr qint64 kMaxImageMemoryBytes = 12LL * 1024 * 1024;
 constexpr int kMaxStoredImageExtent = 2200;
@@ -144,8 +144,8 @@ void NoteEditor::setCurrentNoteId(qint64 noteId)
 void NoteEditor::loadContent(const QString &content)
 {
     clear();
-    if (content.startsWith(QLatin1StringView(kRichContentPrefix))) {
-        setHtml(content.mid(qsizetype(sizeof(kRichContentPrefix) - 1)));
+    if (content.startsWith(kRichContentPrefix)) {
+        setHtml(content.mid(kRichContentPrefix.size()));
         return;
     }
 
@@ -158,7 +158,7 @@ QString NoteEditor::serializedContent() const
         return toPlainText();
     }
 
-    return QString::fromLatin1(kRichContentPrefix) + extractHtmlBody(toHtml());
+    return kRichContentPrefix + extractHtmlBody(toHtml());
 }
 
 bool NoteEditor::canInsertFromMimeData(const QMimeData *source) const
@@ -189,16 +189,48 @@ void NoteEditor::contextMenuEvent(QContextMenuEvent *event)
 {
     const QTextCursor imageCursor = imageCursorAt(event->pos());
     const bool hasImage = !imageCursor.isNull();
+    const QPalette menuPalette = palette();
+    const QString backgroundColor = menuPalette.color(QPalette::Base).name();
+    const QString textColor = menuPalette.color(QPalette::Text).name();
+    const QString borderColor = menuPalette.color(QPalette::Mid).name();
+    const QString hoverColor = menuPalette.color(QPalette::Highlight).name();
+    const QString hoverTextColor = menuPalette.color(QPalette::HighlightedText).name();
+    const QString disabledTextColor =
+        menuPalette.color(QPalette::Disabled, QPalette::Text).name();
 
     QMenu menu;
     menu.setStyleSheet(QStringLiteral(R"(
 QMenu {
+    background: %1;
+    color: %2;
+    border: 1px solid %3;
     padding: 6px;
 }
 QMenu::item {
     padding: 6px 26px 6px 10px;
+    margin: 1px 0;
+    border-radius: 6px;
+    background: transparent;
 }
-)"));
+QMenu::item:selected {
+    background: %4;
+    color: %5;
+}
+QMenu::item:disabled {
+    color: %6;
+}
+QMenu::separator {
+    height: 1px;
+    margin: 6px 8px;
+    background: %3;
+}
+)")
+                           .arg(backgroundColor,
+                                textColor,
+                                borderColor,
+                                hoverColor,
+                                hoverTextColor,
+                                disabledTextColor));
 
     QAction *previewAction = nullptr;
     QAction *copyImageAction = nullptr;

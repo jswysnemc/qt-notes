@@ -21,6 +21,7 @@ public:
     QVector<NoteSummary> noteSummaries(SortMode sortMode);
     qint64 startupNoteId();
     qint64 latestCreatedNoteId();
+    int importBianqianNotes(const QString &sourceDirectoryPath, QString *errorMessage = nullptr);
 
     bool updateTitle(qint64 id, const QString &title);
     bool updateContent(qint64 id, const QString &content);

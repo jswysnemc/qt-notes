@@ -1,6 +1,7 @@
 #include "app/applicationcontroller.h"
 
 #include <QDir>
+#include <QFileInfo>
 #include <QSet>
 #include <QTimer>
 
@@ -15,6 +16,7 @@ constexpr auto kLastClosedNoteIdKey = "ui/last_closed_note_id";
 constexpr auto kRecentFontsKey = "ui/recent_fonts";
 constexpr auto kGlobalFontFamilyKey = "ui/global_font_family";
 constexpr auto kGlobalFontPointSizeKey = "ui/global_font_point_size";
+constexpr auto kBianqianMigrationDoneKey = "migration/bianqian_imported_v1";
 constexpr int kMaxRecentFonts = 8;
 constexpr int kDefaultFontPointSize = 14;
 
@@ -47,7 +49,29 @@ ApplicationController::ApplicationController(QObject *parent)
 
 bool ApplicationController::initialize(QString *errorMessage)
 {
-    return repository_.initialize(errorMessage);
+    if (!repository_.initialize(errorMessage)) {
+        return false;
+    }
+
+    if (settings_.value(QLatin1StringView(kBianqianMigrationDoneKey), false).toBool()) {
+        return true;
+    }
+
+    if (!QFileInfo::exists(StoragePaths::legacyBianqianNotesPath())) {
+        return true;
+    }
+
+    const int importedCount =
+        repository_.importBianqianNotes(StoragePaths::legacyBianqianPath(), errorMessage);
+    if (importedCount < 0) {
+        return false;
+    }
+
+    settings_.setValue(QLatin1StringView(kBianqianMigrationDoneKey), true);
+    if (importedCount > 0) {
+        emit notesChanged();
+    }
+    return true;
 }
 
 void ApplicationController::start()
