@@ -1,19 +1,31 @@
 #include <QApplication>
 #include <QDebug>
 #include <QFileInfo>
+#include <QLibraryInfo>
+#include <QLocale>
 #include <QMessageBox>
 #include <QString>
 #include <QStandardPaths>
+#include <QTranslator>
 
 #include "app/applicationcontroller.h"
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+    QLocale::setDefault(QLocale(QLocale::Chinese, QLocale::China));
     QApplication::setOrganizationName(QStringLiteral("snemc"));
     QApplication::setOrganizationDomain(QStringLiteral("local.snemc"));
     QApplication::setApplicationName(QStringLiteral("qt-notes"));
     QApplication::setStyle(QStringLiteral("Fusion"));
+
+    QTranslator qtBaseTranslator;
+    if (qtBaseTranslator.load(QLocale(QLocale::Chinese, QLocale::China),
+                              QStringLiteral("qtbase"),
+                              QStringLiteral("_"),
+                              QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
+        app.installTranslator(&qtBaseTranslator);
+    }
 
     const QString desktopFile =
         QStandardPaths::locate(QStandardPaths::ApplicationsLocation,
