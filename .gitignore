@@ -1,0 +1,16 @@
+/build/
+/build-*/
+
+# CMake
+/CMakeUserPresets.json
+/compile_commands.json
+/.cmake/
+
+# IDE
+/.idea/
+/.vscode/
+*.user
+*.user.*
+*.swp
+*.swo
+*~
