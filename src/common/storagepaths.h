@@ -22,14 +22,4 @@ inline QString noteAssetsPath(qint64 noteId)
     return QDir(assetsRootPath()).filePath(QString::number(noteId));
 }
 
-inline QString legacyBianqianPath()
-{
-    return QDir::home().filePath(QStringLiteral(".local/share/bianqian"));
-}
-
-inline QString legacyBianqianNotesPath()
-{
-    return QDir(legacyBianqianPath()).filePath(QStringLiteral("notes.json"));
-}
-
 } // namespace StoragePaths
