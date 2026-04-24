@@ -4,6 +4,7 @@
 #include <QTextEdit>
 
 class QContextMenuEvent;
+class QDialog;
 class QImage;
 class QMimeData;
 class QMouseEvent;
@@ -39,11 +40,11 @@ private:
     bool insertImage(const QImage &image);
     QImage loadImage(const QString &imageUrl) const;
     QImage normalizedImage(const QImage &image, bool *scaled = nullptr) const;
-    void showImagePreview(const QImage &image, const QPoint &globalPos);
+    void showImagePreview(const QImage &image);
     QString storeImage(const QImage &image, bool *scaled = nullptr) const;
 
     qint64 currentNoteId_ = -1;
-    QPointer<QWidget> previewPopup_;
+    QPointer<QDialog> previewDialog_;
     QPoint pressPosition_;
     int pressedImageCursorPosition_ = -1;
 };

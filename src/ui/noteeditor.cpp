@@ -4,7 +4,9 @@
 #include <QClipboard>
 #include <QContextMenuEvent>
 #include <QDateTime>
+#include <QDialog>
 #include <QDir>
+#include <QDialogButtonBox>
 #include <QFileInfo>
 #include <QFrame>
 #include <QGuiApplication>
@@ -15,8 +17,8 @@
 #include <QMimeData>
 #include <QPixmap>
 #include <QRegularExpression>
+#include <QScrollArea>
 #include <QScreen>
-#include <QTimer>
 #include <QTextBlock>
 #include <QTextCursor>
 #include <QTextDocument>
@@ -36,59 +38,8 @@ constexpr auto kRichContentPrefix = "<!--qt-notes:rich-->\n";
 constexpr qint64 kMaxSourceImageBytes = 20LL * 1024 * 1024;
 constexpr qint64 kMaxImageMemoryBytes = 12LL * 1024 * 1024;
 constexpr int kMaxStoredImageExtent = 2200;
-constexpr int kPreviewWidth = 320;
-constexpr int kPreviewHeight = 220;
-
-class ImagePreviewPopup final : public QFrame
-{
-public:
-    explicit ImagePreviewPopup(QWidget *parent = nullptr)
-        : QFrame(parent, Qt::ToolTip | Qt::FramelessWindowHint)
-    {
-        setAttribute(Qt::WA_DeleteOnClose, true);
-        setAttribute(Qt::WA_ShowWithoutActivating, true);
-        setObjectName(QStringLiteral("imagePreviewPopup"));
-
-        auto *layout = new QVBoxLayout(this);
-        layout->setContentsMargins(10, 10, 10, 10);
-        layout->setSpacing(8);
-
-        imageLabel_ = new QLabel(this);
-        imageLabel_->setAlignment(Qt::AlignCenter);
-        imageLabel_->setMinimumSize(140, 100);
-        layout->addWidget(imageLabel_);
-
-        infoLabel_ = new QLabel(this);
-        infoLabel_->setAlignment(Qt::AlignCenter);
-        layout->addWidget(infoLabel_);
-
-        setStyleSheet(QStringLiteral(R"(
-QFrame#imagePreviewPopup {
-    background: rgba(28, 28, 28, 235);
-    border: 1px solid rgba(255, 255, 255, 32);
-    border-radius: 10px;
-}
-QLabel {
-    color: #f4f4f4;
-}
-)"));
-    }
-
-    void setImage(const QImage &image)
-    {
-        imageLabel_->setPixmap(QPixmap::fromImage(
-            image.scaled(kPreviewWidth,
-                         kPreviewHeight,
-                         Qt::KeepAspectRatio,
-                         Qt::SmoothTransformation)));
-        infoLabel_->setText(QStringLiteral("%1 x %2").arg(image.width()).arg(image.height()));
-        adjustSize();
-    }
-
-private:
-    QLabel *imageLabel_ = nullptr;
-    QLabel *infoLabel_ = nullptr;
-};
+constexpr int kPreviewMargin = 36;
+constexpr double kPreviewScreenRatio = 0.9;
 
 bool documentContainsImages(const QTextDocument *document)
 {
@@ -236,11 +187,10 @@ bool NoteEditor::canInsertFromMimeData(const QMimeData *source) const
 
 void NoteEditor::contextMenuEvent(QContextMenuEvent *event)
 {
-    const QPoint globalPos = event->globalPos();
     const QTextCursor imageCursor = imageCursorAt(event->pos());
     const bool hasImage = !imageCursor.isNull();
 
-    QMenu menu(this);
+    QMenu menu;
     menu.setStyleSheet(QStringLiteral(R"(
 QMenu {
     padding: 6px;
@@ -250,64 +200,101 @@ QMenu::item {
 }
 )"));
 
+    QAction *previewAction = nullptr;
+    QAction *copyImageAction = nullptr;
+    QAction *deleteImageAction = nullptr;
     if (hasImage) {
-        QAction *previewAction = menu.addAction(QStringLiteral("预览图片"));
-        QAction *copyImageAction = menu.addAction(QStringLiteral("复制图片"));
-        QAction *deleteImageAction = menu.addAction(QStringLiteral("删除图片"));
+        previewAction = menu.addAction(QStringLiteral("预览图片"));
+        copyImageAction = menu.addAction(QStringLiteral("复制图片"));
+        deleteImageAction = menu.addAction(QStringLiteral("删除图片"));
         menu.addSeparator();
-
-        connect(previewAction, &QAction::triggered, this, [this, imageCursor, globalPos]() {
-            const QImage image = loadImage(imageCursor.charFormat().toImageFormat().name());
-            if (!image.isNull()) {
-                showImagePreview(image, globalPos);
-            }
-        });
-        connect(copyImageAction, &QAction::triggered, this, [this, imageCursor]() {
-            const QImage image = loadImage(imageCursor.charFormat().toImageFormat().name());
-            if (!image.isNull()) {
-                QApplication::clipboard()->setImage(image);
-            }
-        });
-        connect(deleteImageAction, &QAction::triggered, this, [this, imageCursor]() {
-            deleteImage(imageCursor);
-        });
     }
 
     QAction *undoAction = menu.addAction(QStringLiteral("撤销"));
     undoAction->setEnabled(document()->isUndoAvailable());
-    connect(undoAction, &QAction::triggered, this, &QTextEdit::undo);
 
     QAction *redoAction = menu.addAction(QStringLiteral("重做"));
     redoAction->setEnabled(document()->isRedoAvailable());
-    connect(redoAction, &QAction::triggered, this, &QTextEdit::redo);
 
     menu.addSeparator();
 
     QAction *cutAction = menu.addAction(QStringLiteral("剪切"));
     cutAction->setEnabled(textCursor().hasSelection() && isUndoRedoEnabled() && !isReadOnly());
-    connect(cutAction, &QAction::triggered, this, &QTextEdit::cut);
 
     QAction *copyAction = menu.addAction(QStringLiteral("复制"));
     copyAction->setEnabled(textCursor().hasSelection());
-    connect(copyAction, &QAction::triggered, this, &QTextEdit::copy);
 
     QAction *pasteAction = menu.addAction(QStringLiteral("粘贴"));
     pasteAction->setEnabled(canPaste() && !isReadOnly());
-    connect(pasteAction, &QAction::triggered, this, &QTextEdit::paste);
 
     QAction *deleteSelectionAction = menu.addAction(QStringLiteral("删除"));
     deleteSelectionAction->setEnabled(textCursor().hasSelection() && !isReadOnly());
-    connect(deleteSelectionAction, &QAction::triggered, this, [this]() {
-        textCursor().removeSelectedText();
-    });
 
     menu.addSeparator();
 
     QAction *selectAllAction = menu.addAction(QStringLiteral("全选"));
     selectAllAction->setEnabled(!document()->isEmpty());
-    connect(selectAllAction, &QAction::triggered, this, &QTextEdit::selectAll);
+    QAction *selected = menu.exec(event->globalPos());
+    if (selected == nullptr) {
+        return;
+    }
 
-    menu.exec(globalPos);
+    if (selected == previewAction) {
+        const QImage image = loadImage(imageCursor.charFormat().toImageFormat().name());
+        if (!image.isNull()) {
+            showImagePreview(image);
+        }
+        return;
+    }
+
+    if (selected == copyImageAction) {
+        const QImage image = loadImage(imageCursor.charFormat().toImageFormat().name());
+        if (!image.isNull()) {
+            QApplication::clipboard()->setImage(image);
+        }
+        return;
+    }
+
+    if (selected == deleteImageAction) {
+        deleteImage(imageCursor);
+        return;
+    }
+
+    if (selected == undoAction) {
+        undo();
+        return;
+    }
+
+    if (selected == redoAction) {
+        redo();
+        return;
+    }
+
+    if (selected == cutAction) {
+        cut();
+        return;
+    }
+
+    if (selected == copyAction) {
+        copy();
+        return;
+    }
+
+    if (selected == pasteAction) {
+        paste();
+        return;
+    }
+
+    if (selected == deleteSelectionAction) {
+        QTextCursor cursor = textCursor();
+        cursor.removeSelectedText();
+        setTextCursor(cursor);
+        return;
+    }
+
+    if (selected == selectAllAction) {
+        selectAll();
+    }
 }
 
 void NoteEditor::insertFromMimeData(const QMimeData *source)
@@ -362,7 +349,7 @@ void NoteEditor::mouseReleaseEvent(QMouseEvent *event)
 
     const QImage image = loadImage(imageCursor.charFormat().toImageFormat().name());
     if (!image.isNull()) {
-        showImagePreview(image, event->globalPosition().toPoint());
+        showImagePreview(image);
     }
 
     pressedImageCursorPosition_ = -1;
@@ -536,42 +523,71 @@ QImage NoteEditor::normalizedImage(const QImage &image, bool *scaled) const
     return normalized;
 }
 
-void NoteEditor::showImagePreview(const QImage &image, const QPoint &globalPos)
+void NoteEditor::showImagePreview(const QImage &image)
 {
     if (image.isNull()) {
         return;
     }
 
-    if (!previewPopup_.isNull()) {
-        previewPopup_->close();
+    if (!previewDialog_.isNull()) {
+        previewDialog_->close();
     }
 
-    auto *popup = new ImagePreviewPopup();
-    popup->setImage(image);
+    auto *dialog = new QDialog(window());
+    dialog->setAttribute(Qt::WA_DeleteOnClose, true);
+    dialog->setWindowTitle(QStringLiteral("图片预览 %1 x %2").arg(image.width()).arg(image.height()));
+    dialog->setModal(false);
+
+    auto *layout = new QVBoxLayout(dialog);
+    layout->setContentsMargins(12, 12, 12, 12);
+    layout->setSpacing(10);
+
+    auto *scrollArea = new QScrollArea(dialog);
+    scrollArea->setWidgetResizable(false);
+    scrollArea->setAlignment(Qt::AlignCenter);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+    layout->addWidget(scrollArea, 1);
+
+    auto *imageLabel = new QLabel(scrollArea);
+    imageLabel->setPixmap(QPixmap::fromImage(image));
+    imageLabel->setAlignment(Qt::AlignCenter);
+    imageLabel->resize(image.size());
+    scrollArea->setWidget(imageLabel);
+
+    auto *infoLabel =
+        new QLabel(QStringLiteral("原始大小：%1 x %2").arg(image.width()).arg(image.height()), dialog);
+    layout->addWidget(infoLabel);
+
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close, dialog);
+    connect(buttons, &QDialogButtonBox::rejected, dialog, &QDialog::close);
+    connect(buttons, &QDialogButtonBox::accepted, dialog, &QDialog::close);
+    layout->addWidget(buttons);
 
     QRect availableGeometry;
-    if (QScreen *screen = QGuiApplication::screenAt(globalPos)) {
-        availableGeometry = screen->availableGeometry();
+    if (window() != nullptr && window()->screen() != nullptr) {
+        availableGeometry = window()->screen()->availableGeometry();
     } else if (QGuiApplication::primaryScreen() != nullptr) {
         availableGeometry = QGuiApplication::primaryScreen()->availableGeometry();
     }
 
-    QPoint topLeft = globalPos + QPoint(16, 16);
+    const QSize frameSize = image.size() + QSize(kPreviewMargin * 2, kPreviewMargin * 3);
+    QSize dialogSize = frameSize;
     if (availableGeometry.isValid()) {
-        if (topLeft.x() + popup->width() > availableGeometry.right()) {
-            topLeft.setX(qMax(availableGeometry.left(),
-                              availableGeometry.right() - popup->width() - 12));
-        }
-        if (topLeft.y() + popup->height() > availableGeometry.bottom()) {
-            topLeft.setY(qMax(availableGeometry.top(),
-                              availableGeometry.bottom() - popup->height() - 12));
-        }
+        dialogSize = dialogSize.boundedTo(
+            QSize(int(availableGeometry.width() * kPreviewScreenRatio),
+                  int(availableGeometry.height() * kPreviewScreenRatio)));
+    }
+    dialogSize = dialogSize.expandedTo(QSize(420, 320));
+    dialog->resize(dialogSize);
+
+    if (availableGeometry.isValid()) {
+        dialog->move(availableGeometry.center() - QPoint(dialog->width() / 2, dialog->height() / 2));
     }
 
-    popup->move(topLeft);
-    popup->show();
-    previewPopup_ = popup;
-    QTimer::singleShot(1500, popup, &QWidget::close);
+    dialog->show();
+    dialog->raise();
+    dialog->activateWindow();
+    previewDialog_ = dialog;
 }
 
 QString NoteEditor::storeImage(const QImage &image, bool *scaled) const
