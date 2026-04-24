@@ -1,8 +1,10 @@
 #include "app/applicationcontroller.h"
 
+#include <QDir>
 #include <QSet>
 #include <QTimer>
 
+#include "common/storagepaths.h"
 #include "ui/notewindow.h"
 
 namespace {
@@ -15,6 +17,22 @@ constexpr auto kGlobalFontFamilyKey = "ui/global_font_family";
 constexpr auto kGlobalFontPointSizeKey = "ui/global_font_point_size";
 constexpr int kMaxRecentFonts = 8;
 constexpr int kDefaultFontPointSize = 14;
+
+void removeNoteAssets(qint64 id)
+{
+    if (id < 0) {
+        return;
+    }
+
+    QDir noteAssets(StoragePaths::noteAssetsPath(id));
+    if (!noteAssets.exists()) {
+        return;
+    }
+
+    if (!noteAssets.removeRecursively()) {
+        qWarning() << "ApplicationController failed to remove note assets:" << id << noteAssets.path();
+    }
+}
 
 } // namespace
 
@@ -140,6 +158,7 @@ bool ApplicationController::deleteNotes(const QVector<qint64> &ids)
     bool allDeleted = true;
     for (qint64 id : normalizedIds) {
         if (repository_.deleteNote(id)) {
+            removeNoteAssets(id);
             deletedIds.push_back(id);
         } else {
             allDeleted = false;

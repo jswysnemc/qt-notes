@@ -16,6 +16,7 @@ qt_add_executable(qt-notes
     src/main.cpp
     src/app/applicationcontroller.cpp
     src/app/applicationcontroller.h
+    src/common/storagepaths.h
     src/data/notedata.h
     src/data/notesrepository.cpp
     src/data/notesrepository.h

@@ -140,7 +140,7 @@ QByteArray serializeWindowGeometry(const QWidget *window)
 QString editorStylesheet(const ThemeSpec &theme)
 {
     return QStringLiteral(R"(
-QPlainTextEdit#noteEditor {
+QTextEdit#noteEditor {
     background: %1;
     color: %2;
     border: none;
@@ -233,7 +233,8 @@ NoteWindow::NoteWindow(ApplicationController *controller, const NoteData &note, 
 
     {
         const QSignalBlocker blocker(editor_);
-        editor_->setPlainText(note_.content);
+        editor_->setCurrentNoteId(note_.id);
+        editor_->loadContent(note_.content);
     }
 
     titleBar_->setTitle(note_.title);
@@ -250,7 +251,7 @@ NoteWindow::NoteWindow(ApplicationController *controller, const NoteData &note, 
     connect(titleBar_, &TitleBar::titleEdited, this, &NoteWindow::updateTitle);
     connect(titleBar_, &TitleBar::dragRequested, this, &NoteWindow::startWindowMove);
 
-    connect(editor_, &QPlainTextEdit::textChanged, this, [this]() {
+    connect(editor_, &QTextEdit::textChanged, this, [this]() {
         contentDirty_ = true;
         contentSaveTimer_->start();
     });
@@ -342,7 +343,8 @@ void NoteWindow::switchToNote(const NoteData &note)
 
     {
         const QSignalBlocker blocker(editor_);
-        editor_->setPlainText(note_.content);
+        editor_->setCurrentNoteId(note_.id);
+        editor_->loadContent(note_.content);
         QTextCursor cursor = editor_->textCursor();
         cursor.movePosition(QTextCursor::Start);
         editor_->setTextCursor(cursor);
@@ -475,11 +477,11 @@ void NoteWindow::applyEditorSettings()
     editor_->update();
 
     if (note_.wrapMode) {
-        editor_->setLineWrapMode(QPlainTextEdit::WidgetWidth);
+        editor_->setLineWrapMode(QTextEdit::WidgetWidth);
         editor_->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
         editor_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     } else {
-        editor_->setLineWrapMode(QPlainTextEdit::NoWrap);
+        editor_->setLineWrapMode(QTextEdit::NoWrap);
         editor_->setWordWrapMode(QTextOption::NoWrap);
         editor_->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     }
@@ -756,7 +758,7 @@ void NoteWindow::flushContent()
         return;
     }
 
-    const QString text = editor_->toPlainText();
+    const QString text = editor_->serializedContent();
     contentDirty_ = false;
     if (text == note_.content) {
         return;

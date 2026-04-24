@@ -17,6 +17,7 @@
 - 字体与字号为全局设置，修改后所有便签同步生效
 - 支持自动换行开关
 - 支持 `Ctrl + 滚轮` 调整字号
+- 支持粘贴剪贴板图片和拖入本地图片文件
 - 支持横向和纵向滚动
 - 自动保存文本、主题、字体、换行设置和窗口几何信息
 - 设置中可删除当前便签，删除前会二次确认
@@ -32,6 +33,7 @@ cmake --build build -j4
 ## 数据位置
 
 - 数据库：`~/.local/share/snemc/qt-notes/notes.db`
+- 图片附件：`~/.local/share/snemc/qt-notes/assets/`
 - 应用设置：`~/.config/snemc/qt-notes.ini`
 
 ## niri 说明
