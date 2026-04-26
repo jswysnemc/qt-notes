@@ -8,8 +8,7 @@
 
 class QCheckBox;
 class QComboBox;
-class QListWidget;
-class QLineEdit;
+class QFontComboBox;
 class QPushButton;
 class QSpinBox;
 
@@ -37,15 +36,12 @@ public:
 
 private:
     void applyTheme(const ThemeSpec &theme);
-    void populateFontFamilies(const QString &fontFamily);
-    void filterFontFamilies(const QString &text);
     void syncSelectedFont(const QString &fontFamily);
 
     QString noteTitle_;
     QCheckBox *wrapCheckBox_ = nullptr;
     QComboBox *recentFontsCombo_ = nullptr;
-    QLineEdit *fontSearchEdit_ = nullptr;
-    QListWidget *fontListWidget_ = nullptr;
+    QFontComboBox *fontFamilyCombo_ = nullptr;
     QSpinBox *fontSizeSpinBox_ = nullptr;
     QComboBox *sortModeCombo_ = nullptr;
     QComboBox *startupModeCombo_ = nullptr;
