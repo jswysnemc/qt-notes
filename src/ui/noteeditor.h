@@ -33,6 +33,7 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
 
 private:
+    void resetTransientState();
     void deleteImage(const QTextCursor &cursor);
     QSize inlineImageSize(const QSize &imageSize) const;
     QTextCursor imageCursorAt(const QPoint &position) const;

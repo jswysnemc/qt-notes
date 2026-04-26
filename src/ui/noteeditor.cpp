@@ -1,5 +1,6 @@
 #include "ui/noteeditor.h"
 
+#include <QAbstractTextDocumentLayout>
 #include <QApplication>
 #include <QClipboard>
 #include <QContextMenuEvent>
@@ -18,6 +19,7 @@
 #include <QPixmap>
 #include <QRegularExpression>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QScreen>
 #include <QTextBlock>
 #include <QTextCursor>
@@ -143,6 +145,7 @@ void NoteEditor::setCurrentNoteId(qint64 noteId)
 
 void NoteEditor::loadContent(const QString &content)
 {
+    resetTransientState();
     clear();
     if (content.startsWith(kRichContentPrefix)) {
         setHtml(content.mid(kRichContentPrefix.size()));
@@ -150,6 +153,15 @@ void NoteEditor::loadContent(const QString &content)
     }
 
     setPlainText(content);
+}
+
+void NoteEditor::resetTransientState()
+{
+    pressedImageCursorPosition_ = -1;
+    pressPosition_ = {};
+    if (!previewDialog_.isNull()) {
+        previewDialog_->close();
+    }
 }
 
 QString NoteEditor::serializedContent() const
@@ -188,15 +200,31 @@ bool NoteEditor::canInsertFromMimeData(const QMimeData *source) const
 void NoteEditor::contextMenuEvent(QContextMenuEvent *event)
 {
     const QTextCursor imageCursor = imageCursorAt(event->pos());
+    const QTextCursor currentCursor = textCursor();
     const bool hasImage = !imageCursor.isNull();
+    const bool hasSelection = currentCursor.hasSelection();
+    const bool readOnly = isReadOnly();
+    const bool canUndo = document()->isUndoAvailable();
+    const bool canRedo = document()->isRedoAvailable();
+    const bool canCutSelection = hasSelection && isUndoRedoEnabled() && !readOnly;
+    const bool canCopySelection = hasSelection;
+    const bool canPasteContent = canPaste() && !readOnly;
+    const bool canDeleteSelection = hasSelection && !readOnly;
+    const bool canSelectAllContent = !document()->isEmpty();
     const QPalette menuPalette = palette();
-    const QString backgroundColor = menuPalette.color(QPalette::Base).name();
-    const QString textColor = menuPalette.color(QPalette::Text).name();
-    const QString borderColor = menuPalette.color(QPalette::Mid).name();
-    const QString hoverColor = menuPalette.color(QPalette::Highlight).name();
-    const QString hoverTextColor = menuPalette.color(QPalette::HighlightedText).name();
-    const QString disabledTextColor =
-        menuPalette.color(QPalette::Disabled, QPalette::Text).name();
+    const QColor background = menuPalette.color(QPalette::Base);
+    const QColor text = menuPalette.color(QPalette::Text);
+    const QColor border = menuPalette.color(QPalette::Mid);
+    const QColor hover = menuPalette.color(QPalette::Highlight);
+    const QColor hoverText = menuPalette.color(QPalette::HighlightedText);
+    const int disabledGray = background.lightness() < 128 ? 140 : 150;
+    const QColor disabledText(disabledGray, disabledGray, disabledGray);
+    const QString backgroundColor = background.name();
+    const QString textColor = text.name();
+    const QString borderColor = border.name();
+    const QString hoverColor = hover.name();
+    const QString hoverTextColor = hoverText.name();
+    const QString disabledTextColor = disabledText.name();
 
     QMenu menu;
     menu.setStyleSheet(QStringLiteral(R"(
@@ -243,29 +271,29 @@ QMenu::separator {
     }
 
     QAction *undoAction = menu.addAction(QStringLiteral("撤销"));
-    undoAction->setEnabled(document()->isUndoAvailable());
+    undoAction->setEnabled(canUndo);
 
     QAction *redoAction = menu.addAction(QStringLiteral("重做"));
-    redoAction->setEnabled(document()->isRedoAvailable());
+    redoAction->setEnabled(canRedo);
 
     menu.addSeparator();
 
     QAction *cutAction = menu.addAction(QStringLiteral("剪切"));
-    cutAction->setEnabled(textCursor().hasSelection() && isUndoRedoEnabled() && !isReadOnly());
+    cutAction->setEnabled(canCutSelection);
 
     QAction *copyAction = menu.addAction(QStringLiteral("复制"));
-    copyAction->setEnabled(textCursor().hasSelection());
+    copyAction->setEnabled(canCopySelection);
 
     QAction *pasteAction = menu.addAction(QStringLiteral("粘贴"));
-    pasteAction->setEnabled(canPaste() && !isReadOnly());
+    pasteAction->setEnabled(canPasteContent);
 
     QAction *deleteSelectionAction = menu.addAction(QStringLiteral("删除"));
-    deleteSelectionAction->setEnabled(textCursor().hasSelection() && !isReadOnly());
+    deleteSelectionAction->setEnabled(canDeleteSelection);
 
     menu.addSeparator();
 
     QAction *selectAllAction = menu.addAction(QStringLiteral("全选"));
-    selectAllAction->setEnabled(!document()->isEmpty());
+    selectAllAction->setEnabled(canSelectAllContent);
     QAction *selected = menu.exec(event->globalPos());
     if (selected == nullptr) {
         return;
@@ -486,9 +514,26 @@ QSize NoteEditor::inlineImageSize(const QSize &imageSize) const
 
 QTextCursor NoteEditor::imageCursorAt(const QPoint &position) const
 {
-    const QTextCursor hitCursor = cursorForPosition(position);
+    QAbstractTextDocumentLayout *layout = document()->documentLayout();
+    if (layout == nullptr) {
+        return {};
+    }
+
+    QPointF documentPosition(position);
+    if (horizontalScrollBar() != nullptr) {
+        documentPosition.rx() += horizontalScrollBar()->value();
+    }
+    if (verticalScrollBar() != nullptr) {
+        documentPosition.ry() += verticalScrollBar()->value();
+    }
+
+    const int hitPosition = layout->hitTest(documentPosition, Qt::ExactHit);
+    if (hitPosition < 0) {
+        return {};
+    }
+
     const int charCount = document()->characterCount();
-    const int positions[2] = {hitCursor.position(), hitCursor.position() - 1};
+    const int positions[2] = {hitPosition, hitPosition - 1};
 
     for (int candidate : positions) {
         if (candidate < 0 || candidate >= charCount - 1) {
