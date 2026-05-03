@@ -280,7 +280,7 @@ bool ApplicationController::setupGlobalEncryptionPasswords(const QString &simple
 {
     if (simplePassword == recoveryPassword) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("简单密码和复杂恢复密码不能相同。");
+            *errorMessage = tr("Simple password and recovery password must be different.");
         }
         return false;
     }
@@ -316,7 +316,7 @@ bool ApplicationController::unlockGlobalEncryptionPasswords(const QString &simpl
 {
     if (!hasEncryptionPasswordsConfigured()) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("当前还没有设置全局加密密码。");
+            *errorMessage = tr("Global encryption passwords have not been set.");
         }
         return false;
     }
@@ -328,7 +328,7 @@ bool ApplicationController::unlockGlobalEncryptionPasswords(const QString &simpl
     if (!NoteCrypto::verifyPasswordVerifier(simplePassword, simpleVerifier)
         || !NoteCrypto::verifyPasswordVerifier(recoveryPassword, recoveryVerifier)) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("输入的全局密码不正确。");
+            *errorMessage = tr("The entered global password is incorrect.");
         }
         return false;
     }
@@ -345,7 +345,7 @@ bool ApplicationController::changeSimpleEncryptionPassword(const QString &curren
 {
     if (newSimplePassword == currentRecoveryPassword) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("简单密码和复杂恢复密码不能相同。");
+            *errorMessage = tr("Simple password and recovery password must be different.");
         }
         return false;
     }
@@ -390,7 +390,7 @@ bool ApplicationController::changeRecoveryEncryptionPassword(const QString &curr
 {
     if (currentSimplePassword == newRecoveryPassword) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("简单密码和复杂恢复密码不能相同。");
+            *errorMessage = tr("Simple password and recovery password must be different.");
         }
         return false;
     }
@@ -440,7 +440,7 @@ NoteEncryptionResult ApplicationController::enableNoteEncryption(qint64 id,
 {
     NoteEncryptionResult result;
     if (!hasCachedEncryptionPasswords()) {
-        result.errorMessage = QStringLiteral("当前尚未输入全局加密密码。");
+        result.errorMessage = tr("Global encryption passwords have not been entered.");
         return result;
     }
 

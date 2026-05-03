@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QByteArray>
+#include <QCoreApplication>
 #include <QDateTime>
 #include <QString>
 #include <QtGlobal>
@@ -52,7 +53,7 @@ inline QString maskedEncryptedTitle(const QString &title)
 {
     const QString normalized = title.trimmed();
     if (normalized.isEmpty()) {
-        return QStringLiteral("已加密便签");
+        return QCoreApplication::translate("NoteData", "Encrypted note");
     }
 
     const int totalLength = normalized.size();

@@ -58,7 +58,7 @@ public:
 
         if (encrypted) {
             const QString badgeText =
-                recoveryRequired ? QStringLiteral("已锁定") : QStringLiteral("已加密");
+                recoveryRequired ? tr("Locked") : tr("Encrypted");
             const QFontMetrics badgeMetrics(option.font);
             const int badgeWidth = badgeMetrics.horizontalAdvance(badgeText) + 14;
             const QRect badgeRect(card.right() - badgeWidth - 10, card.top() + 8, badgeWidth, 20);
@@ -84,7 +84,7 @@ public:
         painter->setPen(theme_.mutedTextColor);
         painter->drawText(timeRect,
                           Qt::AlignLeft | Qt::AlignVCenter | Qt::TextSingleLine,
-                          QStringLiteral("编辑于 %1")
+                          tr("Edited %1")
                               .arg(displayTimestamp(index.data(NoteListModel::UpdatedAtRole)
                                                         .toLongLong())));
         painter->restore();
@@ -111,7 +111,7 @@ NoteListPopup::NoteListPopup(QWidget *parent)
     layout->setContentsMargins(12, 12, 12, 12);
     layout->setSpacing(8);
 
-    emptyLabel_ = new QLabel(QStringLiteral("还没有便签"), this);
+    emptyLabel_ = new QLabel(tr("No notes yet"), this);
     emptyLabel_->setAlignment(Qt::AlignCenter);
     layout->addWidget(emptyLabel_);
 
@@ -136,10 +136,10 @@ NoteListPopup::NoteListPopup(QWidget *parent)
     actionsLayout->setContentsMargins(0, 0, 0, 0);
     actionsLayout->setSpacing(8);
 
-    openButton_ = new QPushButton(QStringLiteral("打开选中"), this);
-    selectionModeButton_ = new QPushButton(QStringLiteral("选择"), this);
-    selectAllButton_ = new QPushButton(QStringLiteral("全选"), this);
-    deleteButton_ = new QPushButton(QStringLiteral("删除选中"), this);
+    openButton_ = new QPushButton(tr("Open selected"), this);
+    selectionModeButton_ = new QPushButton(tr("Select"), this);
+    selectAllButton_ = new QPushButton(tr("Select all"), this);
+    deleteButton_ = new QPushButton(tr("Delete selected"), this);
     deleteButton_->setObjectName(QStringLiteral("dangerButton"));
 
     actionsLayout->addWidget(openButton_, 1);
@@ -351,11 +351,11 @@ void NoteListPopup::updateActionState()
     openButton_->setEnabled(selectionMode_ && hasSelection);
     deleteButton_->setEnabled(selectionMode_ && hasSelection);
     selectAllButton_->setEnabled(selectionMode_ && hasNotes);
-    selectAllButton_->setText(allSelected ? QStringLiteral("全不选") : QStringLiteral("全选"));
+    selectAllButton_->setText(allSelected ? tr("Deselect all") : tr("Select all"));
 
     selectionModeButton_->setVisible(hasNotes);
-    selectionModeButton_->setText(selectionMode_ ? QStringLiteral("完成")
-                                                 : QStringLiteral("选择"));
+    selectionModeButton_->setText(selectionMode_ ? tr("Done")
+                                                 : tr("Select"));
 }
 
 void NoteListPopup::handleItemClicked(const QModelIndex &index)
@@ -466,15 +466,15 @@ void NoteListPopup::renameNoteAt(const QModelIndex &index)
 
     if (encrypted) {
         QMessageBox::information(parentWidget(),
-                                 QStringLiteral("便签已加密"),
-                                 QStringLiteral("加密便签需要先在对应窗口里解锁后再修改标题。"));
+                                 tr("Note is encrypted"),
+                                 tr("Encrypted notes must be unlocked in their window before renaming."));
         return;
     }
 
     bool accepted = false;
     const QString nextTitle = QInputDialog::getText(parentWidget(),
-                                                    QStringLiteral("重命名便签"),
-                                                    QStringLiteral("便签标题"),
+                                                    tr("Rename note"),
+                                                    tr("Note title"),
                                                     QLineEdit::Normal,
                                                     currentTitle,
                                                     &accepted)

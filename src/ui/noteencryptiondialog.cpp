@@ -42,8 +42,8 @@ EncryptNoteDialog::EncryptNoteDialog(const QString &noteTitle,
     , mode_(mode)
 {
     setWindowTitle(mode_ == EncryptNoteDialogMode::SetupGlobalPasswords
-                       ? QStringLiteral("设置全局加密密码")
-                       : QStringLiteral("输入全局加密密码"));
+                       ? tr("Set global encryption passwords")
+                       : tr("Enter global encryption passwords"));
     setModal(true);
     resize(620, mode_ == EncryptNoteDialogMode::SetupGlobalPasswords ? 390 : 310);
     setMinimumWidth(620);
@@ -55,15 +55,15 @@ EncryptNoteDialog::EncryptNoteDialog(const QString &noteTitle,
     summaryLabel_ = new QLabel(this);
     summaryLabel_->setWordWrap(true);
     summaryLabel_->setObjectName(QStringLiteral("summaryLabel"));
-    const QString displayTitle = noteTitle.trimmed().isEmpty() ? QStringLiteral("未命名便签")
+    const QString displayTitle = noteTitle.trimmed().isEmpty() ? tr("Untitled note")
                                                                : noteTitle;
     if (mode_ == EncryptNoteDialogMode::SetupGlobalPasswords) {
         summaryLabel_->setText(
-            QStringLiteral("当前便签：%1\n首次启用加密需要先设置一套全局密码。后续加密便签都会共用这套简单密码和复杂恢复密码。")
+            tr("Current note: %1\nFirst-time encryption requires setting global passwords. All subsequent encrypted notes will share these simple and recovery passwords.")
                 .arg(displayTitle));
     } else {
         summaryLabel_->setText(
-            QStringLiteral("当前便签：%1\n该应用已经设置过全局加密密码。输入同一套简单密码和复杂恢复密码后，即可对当前便签启用加密。")
+            tr("Current note: %1\nGlobal encryption passwords have been set. Enter the same simple and recovery passwords to encrypt this note.")
                 .arg(displayTitle));
     }
     rootLayout->addWidget(summaryLabel_);
@@ -82,24 +82,24 @@ EncryptNoteDialog::EncryptNoteDialog(const QString &noteTitle,
     stylePasswordEdit(recoveryPasswordEdit_);
     stylePasswordEdit(recoveryPasswordConfirmEdit_);
 
-    formLayout->addRow(QStringLiteral("简单密码"), simplePasswordEdit_);
-    formLayout->addRow(QStringLiteral("复杂恢复密码"), recoveryPasswordEdit_);
+    formLayout->addRow(tr("Simple password"), simplePasswordEdit_);
+    formLayout->addRow(tr("Recovery password"), recoveryPasswordEdit_);
     if (mode_ == EncryptNoteDialogMode::SetupGlobalPasswords) {
-        simplePasswordEdit_->setPlaceholderText(QStringLiteral("至少 4 个字符"));
+        simplePasswordEdit_->setPlaceholderText(tr("At least 4 characters"));
         recoveryPasswordEdit_->setPlaceholderText(
-            QStringLiteral("至少 12 个字符，建议包含大小写、数字和符号"));
-        formLayout->addRow(QStringLiteral("确认简单密码"), simplePasswordConfirmEdit_);
-        formLayout->addRow(QStringLiteral("确认恢复密码"), recoveryPasswordConfirmEdit_);
+            tr("At least 12 characters, recommended: uppercase, lowercase, digits, and symbols"));
+        formLayout->addRow(tr("Confirm simple password"), simplePasswordConfirmEdit_);
+        formLayout->addRow(tr("Confirm recovery password"), recoveryPasswordConfirmEdit_);
     } else {
-        simplePasswordEdit_->setPlaceholderText(QStringLiteral("输入已设置的全局简单密码"));
-        recoveryPasswordEdit_->setPlaceholderText(QStringLiteral("输入已设置的全局复杂恢复密码"));
+        simplePasswordEdit_->setPlaceholderText(tr("Enter the configured global simple password"));
+        recoveryPasswordEdit_->setPlaceholderText(tr("Enter the configured global recovery password"));
         simplePasswordConfirmEdit_->hide();
         recoveryPasswordConfirmEdit_->hide();
     }
     rootLayout->addLayout(formLayout);
 
     auto *hintLabel = new QLabel(
-        QStringLiteral("安全限制：含图片附件的便签暂不支持启用加密，避免附件明文落盘。"), this);
+        tr("Security restriction: notes with image attachments cannot be encrypted to prevent plaintext exposure."), this);
     hintLabel->setWordWrap(true);
     hintLabel->setObjectName(QStringLiteral("hintLabel"));
     rootLayout->addWidget(hintLabel);
@@ -129,7 +129,7 @@ void EncryptNoteDialog::accept()
 
     if (mode_ == EncryptNoteDialogMode::EnterGlobalPasswords) {
         if (simple.isEmpty() || recovery.isEmpty()) {
-            QMessageBox::warning(this, QStringLiteral("密码为空"), QStringLiteral("请输入完整的全局密码。"));
+            QMessageBox::warning(this, tr("Password is empty"), tr("Please enter the complete global passwords."));
             return;
         }
         QDialog::accept();
@@ -139,26 +139,26 @@ void EncryptNoteDialog::accept()
     const QString simpleConfirm = simplePasswordConfirmEdit_->text();
     const QString recoveryConfirm = recoveryPasswordConfirmEdit_->text();
     if (simple != simpleConfirm) {
-        QMessageBox::warning(this, QStringLiteral("密码不一致"), QStringLiteral("简单密码两次输入不一致。"));
+        QMessageBox::warning(this, tr("Passwords do not match"), tr("Simple password entries do not match."));
         return;
     }
     if (recovery != recoveryConfirm) {
         QMessageBox::warning(this,
-                             QStringLiteral("密码不一致"),
-                             QStringLiteral("复杂恢复密码两次输入不一致。"));
+                             tr("Passwords do not match"),
+                             tr("Recovery password entries do not match."));
         return;
     }
     if (simple == recovery) {
         QMessageBox::warning(this,
-                             QStringLiteral("密码不合规"),
-                             QStringLiteral("简单密码和复杂恢复密码不能相同。"));
+                             tr("Invalid password"),
+                             tr("Simple password and recovery password must be different."));
         return;
     }
 
     QString errorMessage;
     if (!NoteCrypto::looksAcceptableSimplePassword(simple, &errorMessage)
         || !NoteCrypto::looksStrongRecoveryPassword(recovery, &errorMessage)) {
-        QMessageBox::warning(this, QStringLiteral("密码不合规"), errorMessage);
+        QMessageBox::warning(this, tr("Invalid password"), errorMessage);
         return;
     }
 
@@ -224,8 +224,8 @@ UnlockNoteDialog::UnlockNoteDialog(bool recoveryPasswordRequired,
                                    QWidget *parent)
     : QDialog(parent)
 {
-    setWindowTitle(recoveryPasswordRequired ? QStringLiteral("输入复杂恢复密码")
-                                            : QStringLiteral("输入简单密码"));
+    setWindowTitle(recoveryPasswordRequired ? tr("Enter recovery password")
+                                            : tr("Enter simple password"));
     setModal(true);
     resize(560, 250);
     setMinimumWidth(560);
@@ -239,17 +239,17 @@ UnlockNoteDialog::UnlockNoteDialog(bool recoveryPasswordRequired,
     summaryLabel_->setObjectName(QStringLiteral("summaryLabel"));
     if (recoveryPasswordRequired) {
         summaryLabel_->setText(
-            QStringLiteral("当前便签已锁定。连续输错 3 次后，必须输入复杂恢复密码才能重新解锁。"));
+            tr("This note is locked. After 3 failed attempts, the recovery password is required to unlock."));
     } else {
-        summaryLabel_->setText(QStringLiteral("当前便签已加密。输入简单密码后可临时解锁。还剩 %1 次机会。")
+        summaryLabel_->setText(tr("This note is encrypted. Enter the simple password to unlock. %1 attempts remaining.")
                                    .arg(qMax(0, remainingSimpleAttempts)));
     }
     rootLayout->addWidget(summaryLabel_);
 
     passwordEdit_ = new QLineEdit(this);
     stylePasswordEdit(passwordEdit_);
-    passwordEdit_->setPlaceholderText(recoveryPasswordRequired ? QStringLiteral("输入复杂恢复密码")
-                                                               : QStringLiteral("输入简单密码"));
+    passwordEdit_->setPlaceholderText(recoveryPasswordRequired ? tr("Enter recovery password")
+                                                               : tr("Enter simple password"));
     passwordEdit_->setFocus();
     rootLayout->addWidget(passwordEdit_);
 
@@ -269,7 +269,7 @@ QString UnlockNoteDialog::password() const
 void UnlockNoteDialog::accept()
 {
     if (passwordEdit_->text().isEmpty()) {
-        QMessageBox::warning(this, QStringLiteral("密码为空"), QStringLiteral("请输入密码。"));
+        QMessageBox::warning(this, tr("Password is empty"), tr("Please enter a password."));
         return;
     }
 
@@ -329,7 +329,7 @@ ChangeEncryptionPasswordDialog::ChangeEncryptionPasswordDialog(ChangeEncryptionP
     , mode_(mode)
 {
     const bool simpleMode = mode_ == ChangeEncryptionPasswordMode::SimplePassword;
-    setWindowTitle(simpleMode ? QStringLiteral("修改短密码") : QStringLiteral("修改长密码"));
+    setWindowTitle(simpleMode ? tr("Change simple password") : tr("Change recovery password"));
     setModal(true);
     resize(620, 390);
     setMinimumWidth(620);
@@ -342,8 +342,8 @@ ChangeEncryptionPasswordDialog::ChangeEncryptionPasswordDialog(ChangeEncryptionP
     summaryLabel_->setWordWrap(true);
     summaryLabel_->setObjectName(QStringLiteral("summaryLabel"));
     summaryLabel_->setText(simpleMode
-                               ? QStringLiteral("修改短密码会同时更新所有加密便签的短密码密钥封装。")
-                               : QStringLiteral("修改长密码会同时更新所有加密便签的长密码密钥封装。"));
+                               ? tr("Changing the simple password updates the key wrapping for all encrypted notes.")
+                               : tr("Changing the recovery password updates the key wrapping for all encrypted notes."));
     rootLayout->addWidget(summaryLabel_);
 
     auto *formLayout = new QFormLayout();
@@ -360,17 +360,17 @@ ChangeEncryptionPasswordDialog::ChangeEncryptionPasswordDialog(ChangeEncryptionP
     stylePasswordEdit(newPasswordEdit_);
     stylePasswordEdit(newPasswordConfirmEdit_);
 
-    currentSimplePasswordEdit_->setPlaceholderText(QStringLiteral("输入当前短密码"));
-    currentRecoveryPasswordEdit_->setPlaceholderText(QStringLiteral("输入当前长密码"));
-    newPasswordEdit_->setPlaceholderText(simpleMode ? QStringLiteral("至少 4 个字符")
-                                                    : QStringLiteral("至少 12 个字符"));
-    newPasswordConfirmEdit_->setPlaceholderText(QStringLiteral("再次输入新密码"));
+    currentSimplePasswordEdit_->setPlaceholderText(tr("Enter current simple password"));
+    currentRecoveryPasswordEdit_->setPlaceholderText(tr("Enter current recovery password"));
+    newPasswordEdit_->setPlaceholderText(simpleMode ? tr("At least 4 characters")
+                                                    : tr("At least 12 characters"));
+    newPasswordConfirmEdit_->setPlaceholderText(tr("Re-enter new password"));
 
-    formLayout->addRow(QStringLiteral("当前短密码"), currentSimplePasswordEdit_);
-    formLayout->addRow(QStringLiteral("当前长密码"), currentRecoveryPasswordEdit_);
-    formLayout->addRow(simpleMode ? QStringLiteral("新短密码") : QStringLiteral("新长密码"),
+    formLayout->addRow(tr("Current simple password"), currentSimplePasswordEdit_);
+    formLayout->addRow(tr("Current recovery password"), currentRecoveryPasswordEdit_);
+    formLayout->addRow(simpleMode ? tr("New simple password") : tr("New recovery password"),
                        newPasswordEdit_);
-    formLayout->addRow(QStringLiteral("确认新密码"), newPasswordConfirmEdit_);
+    formLayout->addRow(tr("Confirm new password"), newPasswordConfirmEdit_);
     rootLayout->addLayout(formLayout);
 
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
@@ -404,23 +404,23 @@ void ChangeEncryptionPasswordDialog::accept()
     const QString nextPasswordConfirm = newPasswordConfirmEdit_->text();
 
     if (currentSimple.isEmpty() || currentRecovery.isEmpty() || nextPassword.isEmpty()) {
-        QMessageBox::warning(this, QStringLiteral("密码为空"), QStringLiteral("请输入完整的密码。"));
+        QMessageBox::warning(this, tr("Password is empty"), tr("Please enter the complete passwords."));
         return;
     }
     if (nextPassword != nextPasswordConfirm) {
-        QMessageBox::warning(this, QStringLiteral("密码不一致"), QStringLiteral("新密码两次输入不一致。"));
+        QMessageBox::warning(this, tr("Passwords do not match"), tr("New password entries do not match."));
         return;
     }
     if (mode_ == ChangeEncryptionPasswordMode::SimplePassword && nextPassword == currentRecovery) {
         QMessageBox::warning(this,
-                             QStringLiteral("密码不合规"),
-                             QStringLiteral("短密码和长密码不能相同。"));
+                             tr("Invalid password"),
+                             tr("Simple password and recovery password must be different."));
         return;
     }
     if (mode_ == ChangeEncryptionPasswordMode::RecoveryPassword && nextPassword == currentSimple) {
         QMessageBox::warning(this,
-                             QStringLiteral("密码不合规"),
-                             QStringLiteral("短密码和长密码不能相同。"));
+                             tr("Invalid password"),
+                             tr("Simple password and recovery password must be different."));
         return;
     }
 
@@ -429,7 +429,7 @@ void ChangeEncryptionPasswordDialog::accept()
                            ? NoteCrypto::looksAcceptableSimplePassword(nextPassword, &errorMessage)
                            : NoteCrypto::looksStrongRecoveryPassword(nextPassword, &errorMessage);
     if (!valid) {
-        QMessageBox::warning(this, QStringLiteral("密码不合规"), errorMessage);
+        QMessageBox::warning(this, tr("Invalid password"), errorMessage);
         return;
     }
 

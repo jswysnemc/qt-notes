@@ -1,5 +1,6 @@
 #include "security/unlockstatestore.h"
 
+#include <QCoreApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -56,7 +57,7 @@ QString serializeState(const FailedUnlockState &state)
 bool parseState(const gchar *payload, FailedUnlockState *state, QString *errorMessage)
 {
     if (state == nullptr) {
-        setError(errorMessage, QStringLiteral("内部错误：缺少解锁状态输出"));
+        setError(errorMessage, QCoreApplication::translate("UnlockStateStore", "Internal error: missing unlock state output"));
         return false;
     }
     if (payload == nullptr || *payload == '\0') {
@@ -66,14 +67,14 @@ bool parseState(const gchar *payload, FailedUnlockState *state, QString *errorMe
 
     const QJsonDocument document = QJsonDocument::fromJson(QByteArray(payload));
     if (!document.isObject()) {
-        setError(errorMessage, QStringLiteral("系统密钥库中的解锁状态已损坏"));
+        setError(errorMessage, QCoreApplication::translate("UnlockStateStore", "Unlock state in system keyring is corrupted"));
         return false;
     }
 
     const QJsonObject root = document.object();
     const int failedAttempts = root.value(QStringLiteral("failed_attempts")).toInt(-1);
     if (failedAttempts < 0) {
-        setError(errorMessage, QStringLiteral("系统密钥库中的解锁次数无效"));
+        setError(errorMessage, QCoreApplication::translate("UnlockStateStore", "Invalid unlock attempt count in system keyring"));
         return false;
     }
 
@@ -89,11 +90,11 @@ bool UnlockStateStore::load(qint64 noteId,
                             QString *errorMessage) const
 {
     if (noteId < 0) {
-        setError(errorMessage, QStringLiteral("便签标识无效"));
+        setError(errorMessage, QCoreApplication::translate("UnlockStateStore", "Invalid note identifier"));
         return false;
     }
     if (state == nullptr) {
-        setError(errorMessage, QStringLiteral("内部错误：缺少解锁状态输出"));
+        setError(errorMessage, QCoreApplication::translate("UnlockStateStore", "Internal error: missing unlock state output"));
         return false;
     }
 
@@ -108,7 +109,7 @@ bool UnlockStateStore::load(qint64 noteId,
                                                 noteIdUtf8.constData(),
                                                 nullptr);
     if (error != nullptr) {
-        const QString message = fromGError(error, QStringLiteral("无法读取系统密钥库中的解锁状态"));
+        const QString message = fromGError(error, QCoreApplication::translate("UnlockStateStore", "Failed to read unlock state from system keyring"));
         g_error_free(error);
         setError(errorMessage, message);
         return false;
@@ -124,7 +125,7 @@ bool UnlockStateStore::save(qint64 noteId,
                             QString *errorMessage) const
 {
     if (noteId < 0) {
-        setError(errorMessage, QStringLiteral("便签标识无效"));
+        setError(errorMessage, QCoreApplication::translate("UnlockStateStore", "Invalid note identifier"));
         return false;
     }
     if (state.failedAttempts <= 0 && !state.recoveryRequired) {
@@ -149,7 +150,7 @@ bool UnlockStateStore::save(qint64 noteId,
                                                        noteIdUtf8.constData(),
                                                        nullptr);
     if (!stored) {
-        const QString message = fromGError(error, QStringLiteral("无法写入系统密钥库中的解锁状态"));
+        const QString message = fromGError(error, QCoreApplication::translate("UnlockStateStore", "Failed to write unlock state to system keyring"));
         if (error != nullptr) {
             g_error_free(error);
         }
@@ -163,7 +164,7 @@ bool UnlockStateStore::save(qint64 noteId,
 bool UnlockStateStore::clear(qint64 noteId, QString *errorMessage) const
 {
     if (noteId < 0) {
-        setError(errorMessage, QStringLiteral("便签标识无效"));
+        setError(errorMessage, QCoreApplication::translate("UnlockStateStore", "Invalid note identifier"));
         return false;
     }
 
@@ -178,7 +179,7 @@ bool UnlockStateStore::clear(qint64 noteId, QString *errorMessage) const
                                                         noteIdUtf8.constData(),
                                                         nullptr);
     if (!cleared && error != nullptr) {
-        const QString message = fromGError(error, QStringLiteral("无法清理系统密钥库中的解锁状态"));
+        const QString message = fromGError(error, QCoreApplication::translate("UnlockStateStore", "Failed to clear unlock state from system keyring"));
         g_error_free(error);
         setError(errorMessage, message);
         return false;

@@ -2,10 +2,20 @@
 
 #include <limits>
 
+#include <QCoreApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
 
 #include <sodium.h>
+
+namespace {
+
+inline QString tr_c(const char *text)
+{
+    return QCoreApplication::translate("NoteCrypto", text);
+}
+
+} // anonymous namespace (forward declaration)
 
 namespace {
 
@@ -60,7 +70,7 @@ bool deriveKey(const QString &password,
                QString *errorMessage)
 {
     if (derivedKey == nullptr) {
-        setError(errorMessage, QStringLiteral("内部错误：缺少派生密钥输出"));
+        setError(errorMessage, tr_c("Internal error: missing key derivation output"));
         return false;
     }
 
@@ -80,7 +90,7 @@ bool deriveKey(const QString &password,
 
     if (!okay) {
         NoteCrypto::wipe(&key);
-        setError(errorMessage, QStringLiteral("无法派生解锁密钥"));
+        setError(errorMessage, tr_c("Failed to derive unlock key"));
         return false;
     }
 
@@ -96,7 +106,7 @@ bool encryptBytes(const QByteArray &plaintext,
                   QString *errorMessage)
 {
     if (ciphertext == nullptr || nonce == nullptr) {
-        setError(errorMessage, QStringLiteral("内部错误：缺少加密输出"));
+        setError(errorMessage, tr_c("Internal error: missing encryption output"));
         return false;
     }
 
@@ -120,7 +130,7 @@ bool encryptBytes(const QByteArray &plaintext,
             reinterpret_cast<const unsigned char *>(generatedNonce.constData()),
             reinterpret_cast<const unsigned char *>(key.constData()));
     if (result != 0) {
-        setError(errorMessage, QStringLiteral("无法生成便签密文"));
+        setError(errorMessage, tr_c("Failed to generate note ciphertext"));
         return false;
     }
 
@@ -180,13 +190,13 @@ bool parsePayload(const QByteArray &payload,
                   QString *errorMessage)
 {
     if (unlocked == nullptr) {
-        setError(errorMessage, QStringLiteral("内部错误：缺少解密输出"));
+        setError(errorMessage, tr_c("Internal error: missing decryption output"));
         return false;
     }
 
     const QJsonDocument document = QJsonDocument::fromJson(payload);
     if (!document.isObject()) {
-        setError(errorMessage, QStringLiteral("便签密文已损坏"));
+        setError(errorMessage, tr_c("Note ciphertext is corrupted"));
         return false;
     }
 
@@ -204,7 +214,7 @@ bool wrapDataKey(qint64 noteId,
                  QString *errorMessage)
 {
     if (wrap == nullptr) {
-        setError(errorMessage, QStringLiteral("内部错误：缺少密钥封装输出"));
+        setError(errorMessage, tr_c("Internal error: missing key wrap output"));
         return false;
     }
 
@@ -278,7 +288,7 @@ bool unwrapDataKey(qint64 noteId,
 bool NoteCrypto::initialize(QString *errorMessage)
 {
     if (sodium_init() < 0) {
-        setError(errorMessage, QStringLiteral("无法初始化加密库"));
+        setError(errorMessage, tr_c("Failed to initialize crypto library"));
         return false;
     }
     return true;
@@ -287,7 +297,7 @@ bool NoteCrypto::initialize(QString *errorMessage)
 bool NoteCrypto::looksAcceptableSimplePassword(const QString &password, QString *errorMessage)
 {
     if (password.size() < 4) {
-        setError(errorMessage, QStringLiteral("简单密码至少需要 4 个字符"));
+        setError(errorMessage, tr_c("Simple password must be at least 4 characters"));
         return false;
     }
     return true;
@@ -296,7 +306,7 @@ bool NoteCrypto::looksAcceptableSimplePassword(const QString &password, QString 
 bool NoteCrypto::looksStrongRecoveryPassword(const QString &password, QString *errorMessage)
 {
     if (password.size() < 12) {
-        setError(errorMessage, QStringLiteral("复杂恢复密码至少需要 12 个字符"));
+        setError(errorMessage, tr_c("Recovery password must be at least 12 characters"));
         return false;
     }
 
@@ -324,7 +334,7 @@ bool NoteCrypto::looksStrongRecoveryPassword(const QString &password, QString *e
         int(hasLower) + int(hasUpper) + int(hasDigit) + int(hasOther);
     if (categoryCount < 3) {
         setError(errorMessage,
-                 QStringLiteral("复杂恢复密码至少需要包含 3 类字符：小写、大写、数字、符号"));
+                 tr_c("Recovery password must contain at least 3 character categories: lowercase, uppercase, digits, symbols"));
         return false;
     }
 
@@ -336,7 +346,7 @@ bool NoteCrypto::createPasswordVerifier(const QString &password,
                                         QString *errorMessage)
 {
     if (verifier == nullptr) {
-        setError(errorMessage, QStringLiteral("内部错误：缺少密码验证输出"));
+        setError(errorMessage, tr_c("Internal error: missing password verifier output"));
         return false;
     }
 
@@ -351,7 +361,7 @@ bool NoteCrypto::createPasswordVerifier(const QString &password,
                               crypto_pwhash_ALG_ARGON2ID13);
     sodium_memzero(passwordUtf8.data(), static_cast<size_t>(passwordUtf8.size()));
     if (result != 0) {
-        setError(errorMessage, QStringLiteral("无法生成全局密码验证摘要"));
+        setError(errorMessage, tr_c("Failed to generate password verifier"));
         return false;
     }
 
@@ -384,7 +394,7 @@ bool NoteCrypto::encryptForNewNote(qint64 noteId,
                                    QString *errorMessage)
 {
     if (encrypted == nullptr || unlocked == nullptr) {
-        setError(errorMessage, QStringLiteral("内部错误：缺少加密输出"));
+        setError(errorMessage, tr_c("Internal error: missing encryption output"));
         return false;
     }
 
@@ -448,7 +458,7 @@ bool NoteCrypto::encryptWithExistingKey(qint64 noteId,
                                         QString *errorMessage)
 {
     if (dataKey.size() != crypto_aead_xchacha20poly1305_ietf_KEYBYTES) {
-        setError(errorMessage, QStringLiteral("当前解锁状态无效"));
+        setError(errorMessage, tr_c("Current unlock state is invalid"));
         return false;
     }
 
@@ -469,11 +479,11 @@ bool NoteCrypto::rewrapDataKey(qint64 noteId,
                                QString *errorMessage)
 {
     if (nextWrap == nullptr) {
-        setError(errorMessage, QStringLiteral("内部错误：缺少新密钥封装输出"));
+        setError(errorMessage, tr_c("Internal error: missing new key wrap output"));
         return false;
     }
     if (!validateWrapData(currentWrap)) {
-        setError(errorMessage, QStringLiteral("密钥封装数据已损坏"));
+        setError(errorMessage, tr_c("Key wrap data is corrupted"));
         return false;
     }
 
@@ -489,7 +499,7 @@ bool NoteCrypto::rewrapDataKey(qint64 noteId,
     const char *purpose = useRecoveryPassword ? "recovery-wrap" : "simple-wrap";
     QByteArray dataKey;
     if (!unwrapDataKey(noteId, oldPassword, currentWrap, purpose, &dataKey)) {
-        setError(errorMessage, QStringLiteral("当前密码不正确，无法更新加密便签密钥"));
+        setError(errorMessage, tr_c("Current password is incorrect, cannot update encrypted note key"));
         return false;
     }
 
@@ -507,11 +517,11 @@ bool NoteCrypto::encryptAttachmentBytes(qint64 noteId,
                                         QString *errorMessage)
 {
     if (assetId.trimmed().isEmpty()) {
-        setError(errorMessage, QStringLiteral("附件标识无效"));
+        setError(errorMessage, tr_c("Invalid attachment identifier"));
         return false;
     }
     if (dataKey.size() != crypto_aead_xchacha20poly1305_ietf_KEYBYTES) {
-        setError(errorMessage, QStringLiteral("附件加密密钥无效"));
+        setError(errorMessage, tr_c("Invalid attachment encryption key"));
         return false;
     }
 
@@ -532,11 +542,11 @@ bool NoteCrypto::decryptAttachmentBytes(qint64 noteId,
                                         QString *errorMessage)
 {
     if (assetId.trimmed().isEmpty()) {
-        setError(errorMessage, QStringLiteral("附件标识无效"));
+        setError(errorMessage, tr_c("Invalid attachment identifier"));
         return false;
     }
     if (dataKey.size() != crypto_aead_xchacha20poly1305_ietf_KEYBYTES) {
-        setError(errorMessage, QStringLiteral("附件解密密钥无效"));
+        setError(errorMessage, tr_c("Invalid attachment decryption key"));
         return false;
     }
 
@@ -545,7 +555,7 @@ bool NoteCrypto::decryptAttachmentBytes(qint64 noteId,
                       nonce,
                       dataKey,
                       plaintext)) {
-        setError(errorMessage, QStringLiteral("附件密文无法解开"));
+        setError(errorMessage, tr_c("Failed to decrypt attachment"));
         return false;
     }
     return true;
@@ -559,7 +569,7 @@ NoteCrypto::UnlockResult NoteCrypto::unlockWithPassword(qint64 noteId,
     UnlockResult result;
     if (!validateEncryptedData(encrypted)) {
         result.status = UnlockStatus::InvalidData;
-        result.errorMessage = QStringLiteral("便签密文已损坏或字段不完整");
+        result.errorMessage = tr_c("Note ciphertext is corrupted or incomplete");
         return result;
     }
 
@@ -580,7 +590,7 @@ NoteCrypto::UnlockResult NoteCrypto::unlockWithPassword(qint64 noteId,
                       &payload)) {
         wipe(&dataKey);
         result.status = UnlockStatus::InvalidData;
-        result.errorMessage = QStringLiteral("便签密文无法解开");
+        result.errorMessage = tr_c("Failed to decrypt note ciphertext");
         return result;
     }
 

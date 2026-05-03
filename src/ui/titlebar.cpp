@@ -53,13 +53,13 @@ TitleBar::TitleBar(QWidget *parent)
         return button;
     };
 
-    listButton_ = createButton(QStringLiteral("便签列表"));
-    themeButton_ = createButton(QStringLiteral("主题配色"));
-    settingsButton_ = createButton(QStringLiteral("设置"));
-    securityButton_ = createButton(QStringLiteral("启用加密"));
+    listButton_ = createButton(tr("Note List"));
+    themeButton_ = createButton(tr("Theme"));
+    settingsButton_ = createButton(tr("Settings"));
+    securityButton_ = createButton(tr("Enable Encryption"));
     securityButton_->hide();
-    newButton_ = createButton(QStringLiteral("新建便签"));
-    closeButton_ = createButton(QStringLiteral("关闭当前便签"));
+    newButton_ = createButton(tr("New Note"));
+    closeButton_ = createButton(tr("Close Note"));
 
     connect(listButton_, &QToolButton::clicked, this, &TitleBar::listRequested);
     connect(themeButton_, &QToolButton::clicked, this, &TitleBar::themeRequested);
@@ -137,11 +137,11 @@ void TitleBar::setSecurityState(bool encrypted, bool unlocked)
     unlocked_ = unlocked;
 
     if (!encrypted_) {
-        securityButton_->setToolTip(QStringLiteral("启用加密"));
+        securityButton_->setToolTip(tr("Enable Encryption"));
     } else if (unlocked_) {
-        securityButton_->setToolTip(QStringLiteral("重新锁定当前便签"));
+        securityButton_->setToolTip(tr("Re-lock Note"));
     } else {
-        securityButton_->setToolTip(QStringLiteral("解锁当前便签"));
+        securityButton_->setToolTip(tr("Unlock Note"));
     }
 
     updateIcons();

@@ -1,5 +1,6 @@
 #include "data/notesrepository.h"
 
+#include <QCoreApplication>
 #include <QDateTime>
 #include <QDir>
 #include <QLoggingCategory>
@@ -120,7 +121,7 @@ bool loadStoredEncryptedRecord(QSqlDatabase &database,
 {
     if (record == nullptr) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("内部错误：缺少加密便签输出");
+            *errorMessage = QCoreApplication::translate("NotesRepository", "Internal error: missing encrypted note output");
         }
         return false;
     }
@@ -139,7 +140,7 @@ bool loadStoredEncryptedRecord(QSqlDatabase &database,
     if (!query.exec() || !query.next()) {
         if (errorMessage != nullptr) {
             *errorMessage = query.lastError().isValid() ? query.lastError().text()
-                                                        : QStringLiteral("便签不存在");
+                                                        : QCoreApplication::translate("NotesRepository", "Note not found");
         }
         return false;
     }
@@ -191,7 +192,7 @@ bool NotesRepository::initialize(QString *errorMessage)
         QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (dataDirectory.isEmpty()) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("无法确定应用数据目录");
+            *errorMessage = QCoreApplication::translate("NotesRepository", "Failed to determine application data directory");
         }
         qWarning() << "NotesRepository initialize failed: empty app data path";
         return false;
@@ -200,7 +201,7 @@ bool NotesRepository::initialize(QString *errorMessage)
     QDir directory;
     if (!directory.mkpath(dataDirectory)) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("无法创建数据目录：%1").arg(dataDirectory);
+            *errorMessage = QCoreApplication::translate("NotesRepository", "Failed to create data directory: %1").arg(dataDirectory);
         }
         qWarning() << "NotesRepository initialize failed: cannot create data directory"
                    << dataDirectory;
@@ -330,11 +331,11 @@ NoteEncryptionResult NotesRepository::enableEncryption(qint64 id,
     NoteEncryptionResult result;
     const std::optional<NoteData> existing = noteById(id);
     if (!existing.has_value()) {
-        result.errorMessage = QStringLiteral("便签不存在");
+        result.errorMessage = QCoreApplication::translate("NotesRepository", "Note not found");
         return result;
     }
     if (existing->isEncrypted) {
-        result.errorMessage = QStringLiteral("当前便签已经启用加密");
+        result.errorMessage = QCoreApplication::translate("NotesRepository", "Note is already encrypted");
         return result;
     }
 
@@ -599,7 +600,7 @@ bool NotesRepository::rewrapSimplePassword(const QString &oldPassword,
             if (errorMessage != nullptr) {
                 *errorMessage = updateQuery.lastError().isValid()
                                     ? updateQuery.lastError().text()
-                                    : QStringLiteral("加密便签短密码更新失败");
+                                    : QCoreApplication::translate("NotesRepository", "Failed to update simple password for encrypted note");
             }
             return false;
         }
@@ -674,7 +675,7 @@ bool NotesRepository::rewrapRecoveryPassword(const QString &oldPassword,
             if (errorMessage != nullptr) {
                 *errorMessage = updateQuery.lastError().isValid()
                                     ? updateQuery.lastError().text()
-                                    : QStringLiteral("加密便签长密码更新失败");
+                                    : QCoreApplication::translate("NotesRepository", "Failed to update recovery password for encrypted note");
             }
             return false;
         }
@@ -760,13 +761,13 @@ bool NotesRepository::disableEncryption(qint64 id,
     const std::optional<NoteData> existing = noteById(id);
     if (!existing.has_value()) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("便签不存在");
+            *errorMessage = QCoreApplication::translate("NotesRepository", "Note not found");
         }
         return false;
     }
     if (!existing->isEncrypted) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("当前便签未启用加密");
+            *errorMessage = QCoreApplication::translate("NotesRepository", "Note is not encrypted");
         }
         return false;
     }
@@ -865,7 +866,7 @@ bool NotesRepository::loadUnlockStateStrict(qint64 noteId,
 {
     if (state == nullptr) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("内部错误：缺少解锁状态输出");
+            *errorMessage = QCoreApplication::translate("NotesRepository", "Internal error: missing unlock state output");
         }
         return false;
     }

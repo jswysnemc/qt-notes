@@ -202,7 +202,7 @@ NoteEditor::NoteEditor(QWidget *parent)
     : QTextEdit(parent)
 {
     setFrameStyle(QFrame::NoFrame);
-    setPlaceholderText(QStringLiteral("开始记录..."));
+    setPlaceholderText(tr("Start writing..."));
     setAcceptRichText(false);
     setAcceptDrops(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -275,7 +275,7 @@ bool NoteEditor::persistImageAttachments(bool encryptedStorage,
 {
     if (content == nullptr) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("内部错误：缺少便签内容输出");
+            *errorMessage = tr("Internal error: missing note content output");
         }
         return false;
     }
@@ -388,35 +388,35 @@ QMenu::separator {
     QAction *copyImageAction = nullptr;
     QAction *deleteImageAction = nullptr;
     if (hasImage) {
-        previewAction = menu.addAction(QStringLiteral("预览图片"));
-        copyImageAction = menu.addAction(QStringLiteral("复制图片"));
-        deleteImageAction = menu.addAction(QStringLiteral("删除图片"));
+        previewAction = menu.addAction(tr("Preview image"));
+        copyImageAction = menu.addAction(tr("Copy image"));
+        deleteImageAction = menu.addAction(tr("Delete image"));
         menu.addSeparator();
     }
 
-    QAction *undoAction = menu.addAction(QStringLiteral("撤销"));
+    QAction *undoAction = menu.addAction(tr("Undo"));
     undoAction->setEnabled(canUndo);
 
-    QAction *redoAction = menu.addAction(QStringLiteral("重做"));
+    QAction *redoAction = menu.addAction(tr("Redo"));
     redoAction->setEnabled(canRedo);
 
     menu.addSeparator();
 
-    QAction *cutAction = menu.addAction(QStringLiteral("剪切"));
+    QAction *cutAction = menu.addAction(tr("Cut"));
     cutAction->setEnabled(canCutSelection);
 
-    QAction *copyAction = menu.addAction(QStringLiteral("复制"));
+    QAction *copyAction = menu.addAction(tr("Copy"));
     copyAction->setEnabled(canCopySelection);
 
-    QAction *pasteAction = menu.addAction(QStringLiteral("粘贴"));
+    QAction *pasteAction = menu.addAction(tr("Paste"));
     pasteAction->setEnabled(canPasteContent);
 
-    QAction *deleteSelectionAction = menu.addAction(QStringLiteral("删除"));
+    QAction *deleteSelectionAction = menu.addAction(tr("Delete"));
     deleteSelectionAction->setEnabled(canDeleteSelection);
 
     menu.addSeparator();
 
-    QAction *selectAllAction = menu.addAction(QStringLiteral("全选"));
+    QAction *selectAllAction = menu.addAction(tr("Select all"));
     selectAllAction->setEnabled(canSelectAllContent);
     QAction *selected = menu.exec(event->globalPos());
     if (selected == nullptr) {
@@ -573,8 +573,8 @@ bool NoteEditor::insertImagesFromMimeData(const QMimeData *source)
 
         if (containsImageInput) {
             QMessageBox::information(window(),
-                                     QStringLiteral("当前便签已加密"),
-                                     QStringLiteral("加密便签暂不支持插入图片附件。"));
+                                     tr("This note is encrypted"),
+                                     tr("Encrypted notes do not support inserting image attachments."));
             return true;
         }
     }
@@ -756,7 +756,7 @@ bool NoteEditor::persistRichImageDocument(bool encryptedStorage,
 {
     if (currentNoteId_ < 0) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("当前便签标识无效");
+            *errorMessage = tr("Invalid note identifier");
         }
         return false;
     }
@@ -764,7 +764,7 @@ bool NoteEditor::persistRichImageDocument(bool encryptedStorage,
     if (encryptedStorage && encryptedAssetKey_.size()
                                 != crypto_aead_xchacha20poly1305_ietf_KEYBYTES) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("当前附件加密密钥无效");
+            *errorMessage = tr("Invalid attachment encryption key");
         }
         return false;
     }
@@ -778,7 +778,7 @@ bool NoteEditor::persistRichImageDocument(bool encryptedStorage,
     QDir assetDirectory(StoragePaths::noteAssetsPath(currentNoteId_));
     if (!assetDirectory.exists() && !QDir().mkpath(assetDirectory.path())) {
         if (errorMessage != nullptr) {
-            *errorMessage = QStringLiteral("无法创建便签附件目录");
+            *errorMessage = tr("Failed to create note attachment directory");
         }
         return false;
     }
@@ -803,7 +803,7 @@ bool NoteEditor::persistRichImageDocument(bool encryptedStorage,
                 const QImage image = loadImage(originalName);
                 if (image.isNull()) {
                     if (errorMessage != nullptr) {
-                        *errorMessage = QStringLiteral("无法读取图片附件：%1").arg(originalName);
+                        *errorMessage = tr("Failed to read image attachment: %1").arg(originalName);
                     }
                     return false;
                 }
@@ -814,7 +814,7 @@ bool NoteEditor::persistRichImageDocument(bool encryptedStorage,
                     buffer.open(QIODevice::WriteOnly);
                     if (!image.save(&buffer, "PNG")) {
                         if (errorMessage != nullptr) {
-                            *errorMessage = QStringLiteral("无法编码图片附件");
+                            *errorMessage = tr("Failed to encode image attachment");
                         }
                         return false;
                     }
@@ -835,14 +835,14 @@ bool NoteEditor::persistRichImageDocument(bool encryptedStorage,
                                                                                    assetId),
                                               nonce + ciphertext)) {
                         if (errorMessage != nullptr) {
-                            *errorMessage = QStringLiteral("无法写入加密图片附件");
+                            *errorMessage = tr("Failed to write encrypted image attachment");
                         }
                         return false;
                     }
                 } else if (!writeImageAsPng(StoragePaths::notePlainAssetPath(currentNoteId_, assetId),
                                             image)) {
                     if (errorMessage != nullptr) {
-                        *errorMessage = QStringLiteral("无法写入图片附件");
+                        *errorMessage = tr("Failed to write image attachment");
                     }
                     return false;
                 }
@@ -961,7 +961,7 @@ void NoteEditor::showImagePreview(const QImage &image)
 
     auto *dialog = new QDialog(window());
     dialog->setAttribute(Qt::WA_DeleteOnClose, true);
-    dialog->setWindowTitle(QStringLiteral("图片预览 %1 x %2").arg(image.width()).arg(image.height()));
+    dialog->setWindowTitle(tr("Image preview %1 x %2").arg(image.width()).arg(image.height()));
     dialog->setModal(false);
 
     auto *layout = new QVBoxLayout(dialog);
@@ -981,7 +981,7 @@ void NoteEditor::showImagePreview(const QImage &image)
     scrollArea->setWidget(imageLabel);
 
     auto *infoLabel =
-        new QLabel(QStringLiteral("原始大小：%1 x %2").arg(image.width()).arg(image.height()), dialog);
+        new QLabel(tr("Original size: %1 x %2").arg(image.width()).arg(image.height()), dialog);
     layout->addWidget(infoLabel);
 
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close, dialog);

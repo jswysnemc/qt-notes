@@ -13,18 +13,33 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    QLocale::setDefault(QLocale(QLocale::Chinese, QLocale::China));
     QApplication::setOrganizationName(QStringLiteral("snemc"));
     QApplication::setOrganizationDomain(QStringLiteral("local.snemc"));
     QApplication::setApplicationName(QStringLiteral("qt-notes"));
     QApplication::setStyle(QStringLiteral("Fusion"));
 
+    const QLocale locale = QLocale::system();
+
     QTranslator qtBaseTranslator;
-    if (qtBaseTranslator.load(QLocale(QLocale::Chinese, QLocale::China),
+    if (qtBaseTranslator.load(locale,
                               QStringLiteral("qtbase"),
                               QStringLiteral("_"),
                               QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
         app.installTranslator(&qtBaseTranslator);
+    }
+
+    QTranslator appTranslator;
+    const QStringList searchPaths = {
+        QStandardPaths::locate(QStandardPaths::AppDataLocation,
+                               QStringLiteral("translations"),
+                               QStandardPaths::LocateDirectory),
+        QStringLiteral(":/i18n"),
+    };
+    for (const QString &path : searchPaths) {
+        if (appTranslator.load(locale, QStringLiteral("qt-notes"), QStringLiteral("_"), path)) {
+            app.installTranslator(&appTranslator);
+            break;
+        }
     }
 
     const QString desktopFile =
@@ -40,7 +55,7 @@ int main(int argc, char *argv[])
         qCritical() << "qt-notes initialize failed:" << error;
         QMessageBox::critical(nullptr,
                               QStringLiteral("qt-notes"),
-                              QStringLiteral("初始化失败：%1").arg(error));
+                              QCoreApplication::translate("main", "Initialization failed: %1").arg(error));
         return 1;
     }
 

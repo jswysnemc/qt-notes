@@ -11,9 +11,14 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 find_package(PkgConfig REQUIRED)
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql LinguistTools)
 pkg_check_modules(Libsodium REQUIRED IMPORTED_TARGET libsodium)
 pkg_check_modules(Libsecret REQUIRED IMPORTED_TARGET libsecret-1)
+
+set(TS_FILES
+    translations/qt-notes_zh_CN.ts
+    translations/qt-notes_en.ts
+)
 
 qt_add_executable(qt-notes
     src/main.cpp
@@ -47,6 +52,8 @@ qt_add_executable(qt-notes
     src/ui/notewindow.h
 )
 
+qt_add_translations(qt-notes TS_FILES ${TS_FILES})
+
 target_include_directories(qt-notes PRIVATE src)
 
 target_link_libraries(qt-notes PRIVATE
@@ -59,3 +66,6 @@ target_link_libraries(qt-notes PRIVATE
 )
 
 install(TARGETS qt-notes RUNTIME DESTINATION bin)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/translations/qt-notes_zh_CN.qm
+              ${CMAKE_CURRENT_BINARY_DIR}/translations/qt-notes_en.qm
+        DESTINATION share/qt-notes/translations)

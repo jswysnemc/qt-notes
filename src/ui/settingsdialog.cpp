@@ -298,7 +298,7 @@ SettingsDialog::SettingsDialog(const QString &noteTitle,
     : QDialog(parent)
     , noteTitle_(noteTitle)
 {
-    setWindowTitle(QStringLiteral("便签设置"));
+    setWindowTitle(tr("Note settings"));
     setModal(true);
     resize(740, 460);
     setMinimumSize(700, 420);
@@ -307,7 +307,7 @@ SettingsDialog::SettingsDialog(const QString &noteTitle,
     rootLayout->setContentsMargins(18, 18, 18, 18);
     rootLayout->setSpacing(12);
 
-    auto *titleLabel = new QLabel(QStringLiteral("便签设置"), this);
+    auto *titleLabel = new QLabel(tr("Note settings"), this);
     titleLabel->setObjectName(QStringLiteral("settingsTitle"));
     rootLayout->addWidget(titleLabel);
 
@@ -321,10 +321,10 @@ SettingsDialog::SettingsDialog(const QString &noteTitle,
     routesList->setFixedWidth(138);
     routesList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     routesList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    routesList->addItem(QStringLiteral("编辑"));
-    routesList->addItem(QStringLiteral("启动"));
-    routesList->addItem(QStringLiteral("安全"));
-    routesList->addItem(QStringLiteral("删除"));
+    routesList->addItem(tr("Editor"));
+    routesList->addItem(tr("Startup"));
+    routesList->addItem(tr("Security"));
+    routesList->addItem(tr("Delete"));
     bodyLayout->addWidget(routesList);
 
     auto *pages = new QStackedWidget(this);
@@ -354,45 +354,45 @@ SettingsDialog::SettingsDialog(const QString &noteTitle,
         return layout;
     };
 
-    auto *editorPageLayout = createPageLayout(QStringLiteral("编辑"),
-                                             QStringLiteral("调整当前便签的编辑行为和全局字体。"));
+    auto *editorPageLayout = createPageLayout(tr("Editor"),
+                                             tr("Adjust editing behavior and font for the current note."));
 
     auto *editorFormLayout = new QFormLayout();
     editorFormLayout->setLabelAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     editorFormLayout->setFormAlignment(Qt::AlignTop);
     editorFormLayout->setSpacing(10);
 
-    wrapCheckBox_ = new QCheckBox(QStringLiteral("按窗口宽度自动换行"), this);
+    wrapCheckBox_ = new QCheckBox(tr("Word wrap to window width"), this);
     wrapCheckBox_->setChecked(wrapMode);
-    editorFormLayout->addRow(QStringLiteral("换行"), wrapCheckBox_);
+    editorFormLayout->addRow(tr("Wrap"), wrapCheckBox_);
 
     recentFontsCombo_ = new ModernComboBox(this);
-    recentFontsCombo_->addItem(recentFonts.isEmpty() ? QStringLiteral("暂无最近字体")
-                                                     : QStringLiteral("最近使用"));
+    recentFontsCombo_->addItem(recentFonts.isEmpty() ? tr("No recent fonts")
+                                                     : tr("Recently used"));
     recentFontsCombo_->setItemData(0, QString(), Qt::UserRole);
     for (const QString &family : recentFonts) {
         recentFontsCombo_->addItem(family, family);
     }
     recentFontsCombo_->setEnabled(!recentFonts.isEmpty());
-    editorFormLayout->addRow(QStringLiteral("最近字体"), recentFontsCombo_);
+    editorFormLayout->addRow(tr("Recent fonts"), recentFontsCombo_);
 
     fontFamilyCombo_ = new QFontComboBox(this);
     fontFamilyCombo_->setFontFilters(QFontComboBox::ScalableFonts);
     fontFamilyCombo_->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     fontFamilyCombo_->setMinimumContentsLength(14);
     fontFamilyCombo_->setMaxVisibleItems(12);
-    editorFormLayout->addRow(QStringLiteral("系统字体"), fontFamilyCombo_);
+    editorFormLayout->addRow(tr("System font"), fontFamilyCombo_);
 
     fontSizeSpinBox_ = new QSpinBox(this);
     fontSizeSpinBox_->setRange(10, 40);
     fontSizeSpinBox_->setValue(fontPointSize > 0 ? fontPointSize : 14);
-    editorFormLayout->addRow(QStringLiteral("字号"), fontSizeSpinBox_);
+    editorFormLayout->addRow(tr("Font size"), fontSizeSpinBox_);
 
     editorPageLayout->addLayout(editorFormLayout);
     editorPageLayout->addStretch();
 
-    auto *startupPageLayout = createPageLayout(QStringLiteral("启动"),
-                                              QStringLiteral("设置便签列表排序和应用启动时默认打开的便签。"));
+    auto *startupPageLayout = createPageLayout(tr("Startup"),
+                                              tr("Set note list sorting and the default note opened on application startup."));
 
     auto *startupFormLayout = new QFormLayout();
     startupFormLayout->setLabelAlignment(Qt::AlignLeft | Qt::AlignVCenter);
@@ -400,19 +400,19 @@ SettingsDialog::SettingsDialog(const QString &noteTitle,
     startupFormLayout->setSpacing(10);
 
     sortModeCombo_ = new ModernComboBox(this);
-    sortModeCombo_->addItem(QStringLiteral("按最后编辑时间"), static_cast<int>(SortMode::LastEditedDesc));
-    sortModeCombo_->addItem(QStringLiteral("按创建时间"), static_cast<int>(SortMode::CreatedDesc));
-    sortModeCombo_->addItem(QStringLiteral("按标题"), static_cast<int>(SortMode::TitleAsc));
+    sortModeCombo_->addItem(tr("Last edited"), static_cast<int>(SortMode::LastEditedDesc));
+    sortModeCombo_->addItem(tr("Creation time"), static_cast<int>(SortMode::CreatedDesc));
+    sortModeCombo_->addItem(tr("Title"), static_cast<int>(SortMode::TitleAsc));
     sortModeCombo_->setCurrentIndex(sortModeCombo_->findData(static_cast<int>(sortMode)));
-    startupFormLayout->addRow(QStringLiteral("列表排序"), sortModeCombo_);
+    startupFormLayout->addRow(tr("List sorting"), sortModeCombo_);
 
     startupModeCombo_ = new ModernComboBox(this);
-    startupModeCombo_->addItem(QStringLiteral("最后关闭"), static_cast<int>(StartupNoteMode::LastClosed));
-    startupModeCombo_->addItem(QStringLiteral("最后编辑"), static_cast<int>(StartupNoteMode::LastEdited));
-    startupModeCombo_->addItem(QStringLiteral("最后创建"), static_cast<int>(StartupNoteMode::LastCreated));
+    startupModeCombo_->addItem(tr("Last closed"), static_cast<int>(StartupNoteMode::LastClosed));
+    startupModeCombo_->addItem(tr("Last edited"), static_cast<int>(StartupNoteMode::LastEdited));
+    startupModeCombo_->addItem(tr("Last created"), static_cast<int>(StartupNoteMode::LastCreated));
     startupModeCombo_->setCurrentIndex(
         startupModeCombo_->findData(static_cast<int>(startupNoteMode)));
-    startupFormLayout->addRow(QStringLiteral("启动默认便签"), startupModeCombo_);
+    startupFormLayout->addRow(tr("Default note on startup"), startupModeCombo_);
 
     setupModernComboBox(recentFontsCombo_, theme);
     setupModernComboBox(sortModeCombo_, theme);
@@ -421,49 +421,49 @@ SettingsDialog::SettingsDialog(const QString &noteTitle,
     startupPageLayout->addLayout(startupFormLayout);
     startupPageLayout->addStretch();
 
-    auto *securityPageLayout = createPageLayout(QStringLiteral("安全"),
-                                               QStringLiteral("管理当前便签加密状态和全局加密密码。"));
+    auto *securityPageLayout = createPageLayout(tr("Security"),
+                                               tr("Manage note encryption and global encryption passwords."));
     auto *securityActionsLayout = new QVBoxLayout();
     securityActionsLayout->setContentsMargins(0, 0, 0, 0);
     securityActionsLayout->setSpacing(10);
 
     if (noteEncrypted) {
         securityActionButton_ = new QPushButton(encryptionCanBeDisabled
-                                                    ? QStringLiteral("锁定当前便签")
-                                                    : QStringLiteral("解锁当前便签"),
+                                                    ? tr("Lock note")
+                                                    : tr("Unlock note"),
                                                 this);
     } else {
-        securityActionButton_ = new QPushButton(QStringLiteral("加密当前便签"), this);
+        securityActionButton_ = new QPushButton(tr("Encrypt note"), this);
     }
     securityActionsLayout->addWidget(securityActionButton_);
 
     if (noteEncrypted) {
-        disableEncryptionButton_ = new QPushButton(QStringLiteral("取消当前加密"), this);
+        disableEncryptionButton_ = new QPushButton(tr("Remove encryption"), this);
         disableEncryptionButton_->setEnabled(encryptionCanBeDisabled);
         if (!encryptionCanBeDisabled) {
             disableEncryptionButton_->setToolTip(
-                QStringLiteral("请先解锁当前便签，再取消加密。"));
+                tr("Please unlock the note before removing encryption."));
         }
         securityActionsLayout->addWidget(disableEncryptionButton_);
     }
 
-    changeSimplePasswordButton_ = new QPushButton(QStringLiteral("修改短密码"), this);
-    changeRecoveryPasswordButton_ = new QPushButton(QStringLiteral("修改长密码"), this);
+    changeSimplePasswordButton_ = new QPushButton(tr("Change simple password"), this);
+    changeRecoveryPasswordButton_ = new QPushButton(tr("Change recovery password"), this);
     changeSimplePasswordButton_->setEnabled(encryptionPasswordsConfigured);
     changeRecoveryPasswordButton_->setEnabled(encryptionPasswordsConfigured);
     if (!encryptionPasswordsConfigured) {
-        changeSimplePasswordButton_->setToolTip(QStringLiteral("首次启用加密后才能修改密码。"));
-        changeRecoveryPasswordButton_->setToolTip(QStringLiteral("首次启用加密后才能修改密码。"));
+        changeSimplePasswordButton_->setToolTip(tr("Passwords can be changed after encryption is first enabled."));
+        changeRecoveryPasswordButton_->setToolTip(tr("Passwords can be changed after encryption is first enabled."));
     }
     securityActionsLayout->addWidget(changeSimplePasswordButton_);
     securityActionsLayout->addWidget(changeRecoveryPasswordButton_);
     securityPageLayout->addLayout(securityActionsLayout);
     securityPageLayout->addStretch();
 
-    auto *dangerPageLayout = createPageLayout(QStringLiteral("删除"),
-                                             QStringLiteral("删除当前便签。此操作需要再次确认。"));
+    auto *dangerPageLayout = createPageLayout(tr("Delete"),
+                                             tr("Delete the current note. Confirmation is required."));
 
-    deleteButton_ = new QPushButton(QStringLiteral("删除当前便签"), this);
+    deleteButton_ = new QPushButton(tr("Delete note"), this);
     deleteButton_->setObjectName(QStringLiteral("dangerButton"));
     dangerPageLayout->addWidget(deleteButton_);
     dangerPageLayout->addStretch();
@@ -493,12 +493,12 @@ SettingsDialog::SettingsDialog(const QString &noteTitle,
             });
 
     connect(deleteButton_, &QPushButton::clicked, this, [this]() {
-        const QString displayTitle = noteTitle_.trimmed().isEmpty() ? QStringLiteral("当前便签")
+        const QString displayTitle = noteTitle_.trimmed().isEmpty() ? tr("Current note")
                                                                     : noteTitle_;
         const QMessageBox::StandardButton result = QMessageBox::warning(
             this,
-            QStringLiteral("确认删除"),
-            QStringLiteral("删除后无法恢复：\n%1").arg(displayTitle),
+            tr("Confirm deletion"),
+            tr("This cannot be undone:\n%1").arg(displayTitle),
             QMessageBox::Yes | QMessageBox::Cancel,
             QMessageBox::Cancel);
         if (result != QMessageBox::Yes) {
@@ -526,12 +526,12 @@ SettingsDialog::SettingsDialog(const QString &noteTitle,
 
     if (disableEncryptionButton_ != nullptr) {
         connect(disableEncryptionButton_, &QPushButton::clicked, this, [this]() {
-            const QString displayTitle = noteTitle_.trimmed().isEmpty() ? QStringLiteral("当前便签")
+            const QString displayTitle = noteTitle_.trimmed().isEmpty() ? tr("Current note")
                                                                         : noteTitle_;
             const QMessageBox::StandardButton result = QMessageBox::warning(
                 this,
-                QStringLiteral("确认取消加密"),
-                QStringLiteral("取消加密后，这条便签会转成普通便签，标题和正文将以明文写入 SQLite：\n%1")
+                tr("Confirm removing encryption"),
+                tr("After removing encryption, the note will be stored as plaintext in SQLite:\n%1")
                     .arg(displayTitle),
                 QMessageBox::Yes | QMessageBox::Cancel,
                 QMessageBox::Cancel);

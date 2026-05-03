@@ -187,11 +187,11 @@ QString lockedNotePlaceholderText(bool recoveryPasswordRequired)
 {
     if (recoveryPasswordRequired) {
         return QStringLiteral(
-            "该便签已锁定。\n\n连续输错 3 次后，必须输入复杂恢复密码才能重新解锁。\n标题只保留部分字符供辨认，打开设置里的解锁按钮继续。");
+            "This note is locked.\n\nAfter 3 failed attempts, the recovery password is required.\nThe title is partially visible for identification. Use the unlock button in settings to continue.");
     }
 
     return QStringLiteral(
-        "该便签已加密。\n\n打开设置里的解锁按钮，输入简单密码后可临时解锁。\n解锁成功前只显示部分标题，不显示正文。");
+        "This note is encrypted.\n\nUse the unlock button in settings and enter the simple password to unlock.\nUntil unlocked, only a partial title is shown.");
 }
 
 } // namespace
@@ -708,10 +708,10 @@ void NoteWindow::handleSecurityAction()
                                                                    &errorMessage);
             if (!passwordsReady) {
                 QMessageBox::warning(this,
-                                     needsSetup ? QStringLiteral("设置全局密码失败")
-                                                : QStringLiteral("全局密码错误"),
+                                     needsSetup ? tr("Failed to set global passwords")
+                                                : tr("Global password error"),
                                      errorMessage.isEmpty()
-                                         ? QStringLiteral("当前无法使用这套全局加密密码。")
+                                         ? tr("The current global encryption passwords cannot be used.")
                                          : errorMessage);
                 return;
             }
@@ -722,9 +722,9 @@ void NoteWindow::handleSecurityAction()
             controller_->enableNoteEncryption(note_.id, note_.title, currentContent);
         if (!result.success) {
             QMessageBox::warning(this,
-                                 QStringLiteral("启用加密失败"),
+                                 tr("Failed to enable encryption"),
                                  result.errorMessage.isEmpty()
-                                     ? QStringLiteral("当前便签无法启用加密。")
+                                     ? tr("This note cannot be encrypted.")
                                      : result.errorMessage);
             return;
         }
@@ -743,9 +743,9 @@ void NoteWindow::handleSecurityAction()
                                                &errorMessage)) {
             applySecurityState(false);
             QMessageBox::warning(this,
-                                 QStringLiteral("启用加密失败"),
+                                 tr("Failed to enable encryption"),
                                  errorMessage.isEmpty()
-                                     ? QStringLiteral("当前便签图片附件无法完成加密。")
+                                     ? tr("Image attachments in this note cannot be encrypted.")
                                      : errorMessage);
             return;
         }
@@ -768,8 +768,8 @@ void NoteWindow::handleSecurityAction()
         QString errorMessage;
         if (!saveEncryptedSnapshot(&errorMessage)) {
             QMessageBox::warning(this,
-                                 QStringLiteral("锁定失败"),
-                                 errorMessage.isEmpty() ? QStringLiteral("当前便签无法完成锁定。")
+                                 tr("Failed to lock"),
+                                 errorMessage.isEmpty() ? tr("This note cannot be locked.")
                                                         : errorMessage);
             return;
         }
@@ -818,10 +818,10 @@ void NoteWindow::handleSecurityAction()
         note_.recoveryPasswordRequired = result.note.recoveryPasswordRequired;
         applySecurityState(false);
         QMessageBox::warning(this,
-                             QStringLiteral("密码错误"),
+                             tr("Wrong password"),
                              useRecoveryPassword
-                                 ? QStringLiteral("复杂恢复密码错误。")
-                                 : QStringLiteral("简单密码错误，还剩 %1 次机会。")
+                                 ? tr("Recovery password is incorrect.")
+                                 : tr("Simple password is incorrect. %1 attempts remaining.")
                                        .arg(result.remainingSimpleAttempts));
         return;
     case NoteCrypto::UnlockStatus::RecoveryPasswordRequired:
@@ -831,8 +831,8 @@ void NoteWindow::handleSecurityAction()
         note_.recoveryPasswordRequired = true;
         applySecurityState(false);
         QMessageBox::warning(this,
-                             QStringLiteral("便签已锁定"),
-                             QStringLiteral("简单密码已连续输错 3 次，必须输入复杂恢复密码。"));
+                             tr("Note locked"),
+                             tr("Simple password has been entered incorrectly 3 times. The recovery password is required."));
         QTimer::singleShot(0, this, &NoteWindow::handleSecurityAction);
         return;
     case NoteCrypto::UnlockStatus::NotEncrypted:
@@ -843,8 +843,8 @@ void NoteWindow::handleSecurityAction()
     case NoteCrypto::UnlockStatus::InvalidData:
     default:
         QMessageBox::warning(this,
-                             QStringLiteral("解锁失败"),
-                             result.errorMessage.isEmpty() ? QStringLiteral("便签密文无法解开。")
+                             tr("Failed to unlock"),
+                             result.errorMessage.isEmpty() ? tr("Failed to decrypt note.")
                                                            : result.errorMessage);
         return;
     }
@@ -888,16 +888,16 @@ void NoteWindow::showSettingsDialog()
                 passwordDialog.newPassword(),
                 &errorMessage)) {
             QMessageBox::warning(this,
-                                 QStringLiteral("修改短密码失败"),
+                                 tr("Failed to change simple password"),
                                  errorMessage.isEmpty()
-                                     ? QStringLiteral("当前无法修改短密码。")
+                                     ? tr("Cannot change the simple password at this time.")
                                      : errorMessage);
             return;
         }
 
         QMessageBox::information(this,
-                                 QStringLiteral("修改完成"),
-                                 QStringLiteral("短密码已更新。"));
+                                 tr("Done"),
+                                 tr("Simple password updated."));
         return;
     }
 
@@ -916,16 +916,16 @@ void NoteWindow::showSettingsDialog()
                 passwordDialog.newPassword(),
                 &errorMessage)) {
             QMessageBox::warning(this,
-                                 QStringLiteral("修改长密码失败"),
+                                 tr("Failed to change recovery password"),
                                  errorMessage.isEmpty()
-                                     ? QStringLiteral("当前无法修改长密码。")
+                                     ? tr("Cannot change the recovery password at this time.")
                                      : errorMessage);
             return;
         }
 
         QMessageBox::information(this,
-                                 QStringLiteral("修改完成"),
-                                 QStringLiteral("长密码已更新。"));
+                                 tr("Done"),
+                                 tr("Recovery password updated."));
         return;
     }
 
@@ -934,9 +934,9 @@ void NoteWindow::showSettingsDialog()
         QString errorMessage;
         if (!editor_->persistImageAttachments(false, &currentContent, &errorMessage)) {
             QMessageBox::warning(this,
-                                 QStringLiteral("取消加密失败"),
+                                 tr("Failed to remove encryption"),
                                  errorMessage.isEmpty()
-                                     ? QStringLiteral("当前便签图片附件无法转回普通存储。")
+                                     ? tr("Image attachments cannot be reverted to plain storage.")
                                      : errorMessage);
             return;
         }
@@ -945,9 +945,9 @@ void NoteWindow::showSettingsDialog()
                                                 currentContent,
                                                 &errorMessage)) {
             QMessageBox::warning(this,
-                                 QStringLiteral("取消加密失败"),
+                                 tr("Failed to remove encryption"),
                                  errorMessage.isEmpty()
-                                     ? QStringLiteral("当前便签无法转回普通便签。")
+                                     ? tr("This note cannot be reverted to a plain note.")
                                      : errorMessage);
             return;
         }
@@ -1040,14 +1040,14 @@ void NoteWindow::deleteNotesFromList(const QVector<qint64> &ids)
         const QString displayTitle =
             targetNote.has_value() && !targetNote->title.trimmed().isEmpty()
                 ? targetNote->title
-                : QStringLiteral("当前便签");
-        message = QStringLiteral("删除后无法恢复：\n%1").arg(displayTitle);
+                : tr("Current note");
+        message = tr("This cannot be undone:\n%1").arg(displayTitle);
     } else {
-        message = QStringLiteral("删除后无法恢复：\n已选 %1 个便签").arg(normalizedIds.size());
+        message = tr("This cannot be undone:\n%1 notes selected").arg(normalizedIds.size());
     }
 
     const QMessageBox::StandardButton result = QMessageBox::warning(this,
-                                                                    QStringLiteral("确认删除"),
+                                                                    tr("Confirm deletion"),
                                                                     message,
                                                                     QMessageBox::Yes
                                                                         | QMessageBox::Cancel,
@@ -1058,8 +1058,8 @@ void NoteWindow::deleteNotesFromList(const QVector<qint64> &ids)
 
     if (!controller_->deleteNotes(normalizedIds)) {
         QMessageBox::warning(this,
-                             QStringLiteral("删除失败"),
-                             QStringLiteral("选中的便签没有全部删除成功，请稍后重试。"));
+                             tr("Failed to delete"),
+                             tr("Some selected notes were not deleted. Please try again later."));
     }
 }
 
@@ -1067,8 +1067,8 @@ void NoteWindow::deleteCurrentNote()
 {
     if (!controller_->deleteNote(note_.id)) {
         QMessageBox::warning(this,
-                             QStringLiteral("删除失败"),
-                             QStringLiteral("当前便签删除失败，请稍后重试。"));
+                             tr("Failed to delete"),
+                             tr("Failed to delete the current note. Please try again later."));
     }
 }
 
@@ -1097,9 +1097,9 @@ void NoteWindow::updateTitle(const QString &title)
         QString errorMessage;
         if (!saveEncryptedSnapshot(&errorMessage)) {
             QMessageBox::warning(this,
-                                 QStringLiteral("保存失败"),
+                                 tr("Failed to save"),
                                  errorMessage.isEmpty()
-                                     ? QStringLiteral("加密便签标题保存失败。")
+                                     ? tr("Failed to save encrypted note title.")
                                      : errorMessage);
         }
         return;
@@ -1151,8 +1151,8 @@ void NoteWindow::flushContent()
     if (!editor_->persistImageAttachments(note_.isEncrypted, &text, &errorMessage)) {
         contentDirty_ = true;
         QMessageBox::warning(this,
-                             QStringLiteral("保存失败"),
-                             errorMessage.isEmpty() ? QStringLiteral("图片附件保存失败。")
+                             tr("Failed to save"),
+                             errorMessage.isEmpty() ? tr("Failed to save image attachment.")
                                                     : errorMessage);
         return;
     }
@@ -1171,9 +1171,9 @@ void NoteWindow::flushContent()
                                             &errorMessage)) {
             contentDirty_ = true;
             QMessageBox::warning(this,
-                                 QStringLiteral("保存失败"),
+                                 tr("Failed to save"),
                                  errorMessage.isEmpty()
-                                     ? QStringLiteral("加密便签内容保存失败。")
+                                     ? tr("Failed to save encrypted note content.")
                                      : errorMessage);
             return;
         }
