@@ -32,6 +32,10 @@ QVariant NoteListModel::data(const QModelIndex &index, int role) const
         return note.updatedAt;
     case ThemeIdRole:
         return note.themeId;
+    case EncryptedRole:
+        return note.isEncrypted;
+    case RecoveryRequiredRole:
+        return note.recoveryPasswordRequired;
     default:
         return {};
     }

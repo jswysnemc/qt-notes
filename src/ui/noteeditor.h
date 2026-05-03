@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QByteArray>
 #include <QPointer>
 #include <QTextEdit>
 
@@ -18,8 +19,14 @@ class NoteEditor : public QTextEdit
 public:
     explicit NoteEditor(QWidget *parent = nullptr);
     void setCurrentNoteId(qint64 noteId);
+    void setEncryptedAssetKey(const QByteArray &dataKey);
+    void setImageAttachmentsEnabled(bool enabled);
     void loadContent(const QString &content);
     QString serializedContent() const;
+    bool containsImages() const;
+    bool persistImageAttachments(bool encryptedStorage,
+                                 QString *content,
+                                 QString *errorMessage = nullptr);
 
 signals:
     void fontZoomRequested(int steps);
@@ -34,18 +41,25 @@ protected:
 
 private:
     void resetTransientState();
+    void clearImageResources();
     void deleteImage(const QTextCursor &cursor);
     QSize inlineImageSize(const QSize &imageSize) const;
     QTextCursor imageCursorAt(const QPoint &position) const;
     bool insertImagesFromMimeData(const QMimeData *source);
     bool insertImage(const QImage &image);
     QImage loadImage(const QString &imageUrl) const;
+    bool persistRichImageDocument(bool encryptedStorage,
+                                  QString *content,
+                                  QString *errorMessage);
+    void preloadImageResources(const QString &html);
     QImage normalizedImage(const QImage &image, bool *scaled = nullptr) const;
     void showImagePreview(const QImage &image);
     QString storeImage(const QImage &image, bool *scaled = nullptr) const;
 
     qint64 currentNoteId_ = -1;
+    QByteArray encryptedAssetKey_;
     QPointer<QDialog> previewDialog_;
     QPoint pressPosition_;
     int pressedImageCursorPosition_ = -1;
+    bool imageAttachmentsEnabled_ = true;
 };

@@ -56,12 +56,15 @@ TitleBar::TitleBar(QWidget *parent)
     listButton_ = createButton(QStringLiteral("便签列表"));
     themeButton_ = createButton(QStringLiteral("主题配色"));
     settingsButton_ = createButton(QStringLiteral("设置"));
+    securityButton_ = createButton(QStringLiteral("启用加密"));
+    securityButton_->hide();
     newButton_ = createButton(QStringLiteral("新建便签"));
     closeButton_ = createButton(QStringLiteral("关闭当前便签"));
 
     connect(listButton_, &QToolButton::clicked, this, &TitleBar::listRequested);
     connect(themeButton_, &QToolButton::clicked, this, &TitleBar::themeRequested);
     connect(settingsButton_, &QToolButton::clicked, this, &TitleBar::settingsRequested);
+    connect(securityButton_, &QToolButton::clicked, this, &TitleBar::securityRequested);
     connect(newButton_, &QToolButton::clicked, this, &TitleBar::newNoteRequested);
     connect(closeButton_, &QToolButton::clicked, this, &TitleBar::closeRequested);
     connect(titleEdit_, &QLineEdit::returnPressed, this, [this]() {
@@ -128,6 +131,27 @@ QToolButton#titleButton:hover {
                            theme.hoverColor.name()));
 }
 
+void TitleBar::setSecurityState(bool encrypted, bool unlocked)
+{
+    encrypted_ = encrypted;
+    unlocked_ = unlocked;
+
+    if (!encrypted_) {
+        securityButton_->setToolTip(QStringLiteral("启用加密"));
+    } else if (unlocked_) {
+        securityButton_->setToolTip(QStringLiteral("重新锁定当前便签"));
+    } else {
+        securityButton_->setToolTip(QStringLiteral("解锁当前便签"));
+    }
+
+    updateIcons();
+}
+
+void TitleBar::setTitleEditable(bool editable)
+{
+    titleEditable_ = editable;
+}
+
 QWidget *TitleBar::themeButtonWidget() const
 {
     return themeButton_;
@@ -162,7 +186,9 @@ bool TitleBar::eventFilter(QObject *watched, QEvent *event)
 
     switch (event->type()) {
     case QEvent::MouseButtonDblClick:
-        beginEdit();
+        if (titleEditable_) {
+            beginEdit();
+        }
         return true;
     case QEvent::MouseButtonPress: {
         auto *mouseEvent = static_cast<QMouseEvent *>(event);
@@ -227,6 +253,8 @@ void TitleBar::updateIcons()
     listButton_->setIcon(IconFactory::listIcon(theme_.textColor));
     themeButton_->setIcon(IconFactory::paletteIcon(theme_.textColor));
     settingsButton_->setIcon(IconFactory::settingsIcon(theme_.textColor));
+    securityButton_->setIcon(encrypted_ && unlocked_ ? IconFactory::lockOpenIcon(theme_.textColor)
+                                                     : IconFactory::lockClosedIcon(theme_.textColor));
     newButton_->setIcon(IconFactory::plusIcon(theme_.textColor));
     closeButton_->setIcon(IconFactory::closeIcon(theme_.textColor));
 }

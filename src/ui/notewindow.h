@@ -40,6 +40,7 @@ private:
     void restoreWindowGeometry();
     void applyPendingGeometry();
     void showThemeMenu();
+    void handleSecurityAction();
     void showSettingsDialog();
     void showNoteList();
     void openNoteInCurrentWindow(qint64 id);
@@ -53,6 +54,10 @@ private:
     void flushContent();
     void flushAppearance();
     void flushGeometry();
+    void applySecurityState(bool promptForUnlock);
+    bool saveEncryptedSnapshot(QString *errorMessage = nullptr);
+    void clearUnlockedDataKey();
+    bool encryptedNoteUnlocked() const;
     void installResizeEventFilters();
     QPoint mapChildPositionToWindow(QWidget *child, const QPointF &position) const;
     void updateResizeCursor(const QPoint &position, QWidget *cursorTarget = nullptr);
@@ -68,6 +73,7 @@ private:
     QTimer *contentSaveTimer_ = nullptr;
     QTimer *appearanceSaveTimer_ = nullptr;
     QTimer *geometrySaveTimer_ = nullptr;
+    QByteArray unlockedDataKey_;
     bool contentDirty_ = false;
     bool appearanceDirty_ = false;
     bool geometryDirty_ = false;

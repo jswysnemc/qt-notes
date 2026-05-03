@@ -16,6 +16,8 @@ public:
         CreatedAtRole,
         UpdatedAtRole,
         ThemeIdRole,
+        EncryptedRole,
+        RecoveryRequiredRole,
     };
 
     explicit NoteListModel(QObject *parent = nullptr);

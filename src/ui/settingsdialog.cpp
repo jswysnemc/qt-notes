@@ -8,7 +8,9 @@
 #include <QFormLayout>
 #include <QFrame>
 #include <QFontComboBox>
+#include <QHBoxLayout>
 #include <QLabel>
+#include <QListWidget>
 #include <QListView>
 #include <QMessageBox>
 #include <QPainter>
@@ -16,6 +18,7 @@
 #include <QScrollBar>
 #include <QSignalBlocker>
 #include <QSpinBox>
+#include <QStackedWidget>
 #include <QStyledItemDelegate>
 #include <QStyleOptionComboBox>
 #include <QVBoxLayout>
@@ -287,6 +290,9 @@ SettingsDialog::SettingsDialog(const QString &noteTitle,
                                const QStringList &recentFonts,
                                SortMode sortMode,
                                StartupNoteMode startupNoteMode,
+                               bool noteEncrypted,
+                               bool encryptionCanBeDisabled,
+                               bool encryptionPasswordsConfigured,
                                const ThemeSpec &theme,
                                QWidget *parent)
     : QDialog(parent)
@@ -294,25 +300,71 @@ SettingsDialog::SettingsDialog(const QString &noteTitle,
 {
     setWindowTitle(QStringLiteral("便签设置"));
     setModal(true);
-    resize(620, 360);
-    setMinimumWidth(620);
+    resize(740, 460);
+    setMinimumSize(700, 420);
 
     auto *rootLayout = new QVBoxLayout(this);
     rootLayout->setContentsMargins(18, 18, 18, 18);
     rootLayout->setSpacing(12);
 
-    auto *titleLabel = new QLabel(QStringLiteral("当前便签"), this);
+    auto *titleLabel = new QLabel(QStringLiteral("便签设置"), this);
     titleLabel->setObjectName(QStringLiteral("settingsTitle"));
     rootLayout->addWidget(titleLabel);
 
-    auto *formLayout = new QFormLayout();
-    formLayout->setLabelAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    formLayout->setFormAlignment(Qt::AlignTop);
-    formLayout->setSpacing(10);
+    auto *bodyLayout = new QHBoxLayout();
+    bodyLayout->setContentsMargins(0, 0, 0, 0);
+    bodyLayout->setSpacing(14);
+
+    auto *routesList = new QListWidget(this);
+    routesList->setObjectName(QStringLiteral("settingsRoutes"));
+    routesList->setFrameShape(QFrame::NoFrame);
+    routesList->setFixedWidth(138);
+    routesList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    routesList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    routesList->addItem(QStringLiteral("编辑"));
+    routesList->addItem(QStringLiteral("启动"));
+    routesList->addItem(QStringLiteral("安全"));
+    routesList->addItem(QStringLiteral("删除"));
+    bodyLayout->addWidget(routesList);
+
+    auto *pages = new QStackedWidget(this);
+    pages->setObjectName(QStringLiteral("settingsPages"));
+    bodyLayout->addWidget(pages, 1);
+    rootLayout->addLayout(bodyLayout, 1);
+
+    auto createPageLayout = [this, pages](const QString &title, const QString &summary) {
+        auto *page = new QWidget(pages);
+        page->setObjectName(QStringLiteral("settingsPage"));
+        auto *layout = new QVBoxLayout(page);
+        layout->setContentsMargins(18, 16, 18, 16);
+        layout->setSpacing(12);
+
+        auto *pageTitle = new QLabel(title, page);
+        pageTitle->setObjectName(QStringLiteral("settingsPageTitle"));
+        layout->addWidget(pageTitle);
+
+        if (!summary.isEmpty()) {
+            auto *summaryLabel = new QLabel(summary, page);
+            summaryLabel->setWordWrap(true);
+            summaryLabel->setObjectName(QStringLiteral("settingsSummary"));
+            layout->addWidget(summaryLabel);
+        }
+
+        pages->addWidget(page);
+        return layout;
+    };
+
+    auto *editorPageLayout = createPageLayout(QStringLiteral("编辑"),
+                                             QStringLiteral("调整当前便签的编辑行为和全局字体。"));
+
+    auto *editorFormLayout = new QFormLayout();
+    editorFormLayout->setLabelAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    editorFormLayout->setFormAlignment(Qt::AlignTop);
+    editorFormLayout->setSpacing(10);
 
     wrapCheckBox_ = new QCheckBox(QStringLiteral("按窗口宽度自动换行"), this);
     wrapCheckBox_->setChecked(wrapMode);
-    formLayout->addRow(QStringLiteral("换行"), wrapCheckBox_);
+    editorFormLayout->addRow(QStringLiteral("换行"), wrapCheckBox_);
 
     recentFontsCombo_ = new ModernComboBox(this);
     recentFontsCombo_->addItem(recentFonts.isEmpty() ? QStringLiteral("暂无最近字体")
@@ -322,26 +374,37 @@ SettingsDialog::SettingsDialog(const QString &noteTitle,
         recentFontsCombo_->addItem(family, family);
     }
     recentFontsCombo_->setEnabled(!recentFonts.isEmpty());
-    formLayout->addRow(QStringLiteral("最近字体"), recentFontsCombo_);
+    editorFormLayout->addRow(QStringLiteral("最近字体"), recentFontsCombo_);
 
     fontFamilyCombo_ = new QFontComboBox(this);
     fontFamilyCombo_->setFontFilters(QFontComboBox::ScalableFonts);
     fontFamilyCombo_->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     fontFamilyCombo_->setMinimumContentsLength(14);
     fontFamilyCombo_->setMaxVisibleItems(12);
-    formLayout->addRow(QStringLiteral("系统字体"), fontFamilyCombo_);
+    editorFormLayout->addRow(QStringLiteral("系统字体"), fontFamilyCombo_);
 
     fontSizeSpinBox_ = new QSpinBox(this);
     fontSizeSpinBox_->setRange(10, 40);
     fontSizeSpinBox_->setValue(fontPointSize > 0 ? fontPointSize : 14);
-    formLayout->addRow(QStringLiteral("字号"), fontSizeSpinBox_);
+    editorFormLayout->addRow(QStringLiteral("字号"), fontSizeSpinBox_);
+
+    editorPageLayout->addLayout(editorFormLayout);
+    editorPageLayout->addStretch();
+
+    auto *startupPageLayout = createPageLayout(QStringLiteral("启动"),
+                                              QStringLiteral("设置便签列表排序和应用启动时默认打开的便签。"));
+
+    auto *startupFormLayout = new QFormLayout();
+    startupFormLayout->setLabelAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    startupFormLayout->setFormAlignment(Qt::AlignTop);
+    startupFormLayout->setSpacing(10);
 
     sortModeCombo_ = new ModernComboBox(this);
     sortModeCombo_->addItem(QStringLiteral("按最后编辑时间"), static_cast<int>(SortMode::LastEditedDesc));
     sortModeCombo_->addItem(QStringLiteral("按创建时间"), static_cast<int>(SortMode::CreatedDesc));
     sortModeCombo_->addItem(QStringLiteral("按标题"), static_cast<int>(SortMode::TitleAsc));
     sortModeCombo_->setCurrentIndex(sortModeCombo_->findData(static_cast<int>(sortMode)));
-    formLayout->addRow(QStringLiteral("列表排序"), sortModeCombo_);
+    startupFormLayout->addRow(QStringLiteral("列表排序"), sortModeCombo_);
 
     startupModeCombo_ = new ModernComboBox(this);
     startupModeCombo_->addItem(QStringLiteral("最后关闭"), static_cast<int>(StartupNoteMode::LastClosed));
@@ -349,22 +412,68 @@ SettingsDialog::SettingsDialog(const QString &noteTitle,
     startupModeCombo_->addItem(QStringLiteral("最后创建"), static_cast<int>(StartupNoteMode::LastCreated));
     startupModeCombo_->setCurrentIndex(
         startupModeCombo_->findData(static_cast<int>(startupNoteMode)));
-    formLayout->addRow(QStringLiteral("启动默认便签"), startupModeCombo_);
+    startupFormLayout->addRow(QStringLiteral("启动默认便签"), startupModeCombo_);
 
     setupModernComboBox(recentFontsCombo_, theme);
     setupModernComboBox(sortModeCombo_, theme);
     setupModernComboBox(startupModeCombo_, theme);
 
-    rootLayout->addLayout(formLayout);
-    rootLayout->addStretch();
+    startupPageLayout->addLayout(startupFormLayout);
+    startupPageLayout->addStretch();
+
+    auto *securityPageLayout = createPageLayout(QStringLiteral("安全"),
+                                               QStringLiteral("管理当前便签加密状态和全局加密密码。"));
+    auto *securityActionsLayout = new QVBoxLayout();
+    securityActionsLayout->setContentsMargins(0, 0, 0, 0);
+    securityActionsLayout->setSpacing(10);
+
+    if (noteEncrypted) {
+        securityActionButton_ = new QPushButton(encryptionCanBeDisabled
+                                                    ? QStringLiteral("锁定当前便签")
+                                                    : QStringLiteral("解锁当前便签"),
+                                                this);
+    } else {
+        securityActionButton_ = new QPushButton(QStringLiteral("加密当前便签"), this);
+    }
+    securityActionsLayout->addWidget(securityActionButton_);
+
+    if (noteEncrypted) {
+        disableEncryptionButton_ = new QPushButton(QStringLiteral("取消当前加密"), this);
+        disableEncryptionButton_->setEnabled(encryptionCanBeDisabled);
+        if (!encryptionCanBeDisabled) {
+            disableEncryptionButton_->setToolTip(
+                QStringLiteral("请先解锁当前便签，再取消加密。"));
+        }
+        securityActionsLayout->addWidget(disableEncryptionButton_);
+    }
+
+    changeSimplePasswordButton_ = new QPushButton(QStringLiteral("修改短密码"), this);
+    changeRecoveryPasswordButton_ = new QPushButton(QStringLiteral("修改长密码"), this);
+    changeSimplePasswordButton_->setEnabled(encryptionPasswordsConfigured);
+    changeRecoveryPasswordButton_->setEnabled(encryptionPasswordsConfigured);
+    if (!encryptionPasswordsConfigured) {
+        changeSimplePasswordButton_->setToolTip(QStringLiteral("首次启用加密后才能修改密码。"));
+        changeRecoveryPasswordButton_->setToolTip(QStringLiteral("首次启用加密后才能修改密码。"));
+    }
+    securityActionsLayout->addWidget(changeSimplePasswordButton_);
+    securityActionsLayout->addWidget(changeRecoveryPasswordButton_);
+    securityPageLayout->addLayout(securityActionsLayout);
+    securityPageLayout->addStretch();
+
+    auto *dangerPageLayout = createPageLayout(QStringLiteral("删除"),
+                                             QStringLiteral("删除当前便签。此操作需要再次确认。"));
+
+    deleteButton_ = new QPushButton(QStringLiteral("删除当前便签"), this);
+    deleteButton_->setObjectName(QStringLiteral("dangerButton"));
+    dangerPageLayout->addWidget(deleteButton_);
+    dangerPageLayout->addStretch();
+
+    routesList->setCurrentRow(0);
+    connect(routesList, &QListWidget::currentRowChanged, pages, &QStackedWidget::setCurrentIndex);
 
     auto *actionsLayout = new QHBoxLayout();
     actionsLayout->setContentsMargins(0, 0, 0, 0);
     actionsLayout->setSpacing(10);
-
-    deleteButton_ = new QPushButton(QStringLiteral("删除当前便签"), this);
-    deleteButton_->setObjectName(QStringLiteral("dangerButton"));
-    actionsLayout->addWidget(deleteButton_);
     actionsLayout->addStretch();
 
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
@@ -400,6 +509,41 @@ SettingsDialog::SettingsDialog(const QString &noteTitle,
         accept();
     });
 
+    connect(securityActionButton_, &QPushButton::clicked, this, [this]() {
+        securityActionRequested_ = true;
+        accept();
+    });
+
+    connect(changeSimplePasswordButton_, &QPushButton::clicked, this, [this]() {
+        changeSimplePasswordRequested_ = true;
+        accept();
+    });
+
+    connect(changeRecoveryPasswordButton_, &QPushButton::clicked, this, [this]() {
+        changeRecoveryPasswordRequested_ = true;
+        accept();
+    });
+
+    if (disableEncryptionButton_ != nullptr) {
+        connect(disableEncryptionButton_, &QPushButton::clicked, this, [this]() {
+            const QString displayTitle = noteTitle_.trimmed().isEmpty() ? QStringLiteral("当前便签")
+                                                                        : noteTitle_;
+            const QMessageBox::StandardButton result = QMessageBox::warning(
+                this,
+                QStringLiteral("确认取消加密"),
+                QStringLiteral("取消加密后，这条便签会转成普通便签，标题和正文将以明文写入 SQLite：\n%1")
+                    .arg(displayTitle),
+                QMessageBox::Yes | QMessageBox::Cancel,
+                QMessageBox::Cancel);
+            if (result != QMessageBox::Yes) {
+                return;
+            }
+
+            disableEncryptionRequested_ = true;
+            accept();
+        });
+    }
+
     applyTheme(theme);
     syncSelectedFont(fontFamily.isEmpty() ? QApplication::font().family() : fontFamily);
 }
@@ -430,6 +574,26 @@ SortMode SettingsDialog::sortMode() const
 StartupNoteMode SettingsDialog::startupNoteMode() const
 {
     return static_cast<StartupNoteMode>(startupModeCombo_->currentData().toInt());
+}
+
+bool SettingsDialog::securityActionRequested() const
+{
+    return securityActionRequested_;
+}
+
+bool SettingsDialog::disableEncryptionRequested() const
+{
+    return disableEncryptionRequested_;
+}
+
+bool SettingsDialog::changeSimplePasswordRequested() const
+{
+    return changeSimplePasswordRequested_;
+}
+
+bool SettingsDialog::changeRecoveryPasswordRequested() const
+{
+    return changeRecoveryPasswordRequested_;
 }
 
 bool SettingsDialog::deleteRequested() const
@@ -476,9 +640,44 @@ QLabel#settingsTitle {
     font-weight: 700;
     color: %2;
 }
+QLabel#settingsPageTitle {
+    font-size: 14px;
+    font-weight: 700;
+    color: %2;
+}
+QLabel#settingsSummary {
+    color: %8;
+}
 QLabel,
 QCheckBox {
     color: %2;
+}
+QListWidget#settingsRoutes {
+    padding: 6px;
+    border: 1px solid %3;
+    border-radius: 14px;
+    background: %4;
+    outline: none;
+}
+QListWidget#settingsRoutes::item {
+    min-height: 34px;
+    padding: 0 12px;
+    border-radius: 10px;
+    color: %8;
+}
+QListWidget#settingsRoutes::item:hover {
+    background: %5;
+    color: %2;
+}
+QListWidget#settingsRoutes::item:selected {
+    background: %6;
+    color: %2;
+    font-weight: 700;
+}
+QStackedWidget#settingsPages {
+    border: 1px solid %3;
+    border-radius: 14px;
+    background: %4;
 }
 QSpinBox {
     min-height: 32px;
@@ -525,6 +724,11 @@ QPushButton {
 QPushButton:hover {
     background: %5;
 }
+QPushButton:disabled {
+    background: %1;
+    border-color: %3;
+    color: %3;
+}
 QPushButton#dangerButton {
     background: #B94A48;
     border-color: #A23E3C;
@@ -540,6 +744,7 @@ QPushButton#dangerButton:hover {
                                     .arg(theme.editorColor.name())
                                     .arg(mixedColor(theme.hoverColor, theme.borderColor, 0.42).name())
                                     .arg(mixedColor(theme.accentColor, theme.borderColor, 0.58).name())
-                                    .arg(mixedColor(theme.editorColor, theme.surfaceColor, 0.16).name());
+                                    .arg(mixedColor(theme.editorColor, theme.surfaceColor, 0.16).name())
+                                    .arg(theme.mutedTextColor.name());
     setStyleSheet(dialogStyle);
 }

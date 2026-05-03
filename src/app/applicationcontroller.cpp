@@ -15,6 +15,8 @@ constexpr auto kLastClosedNoteIdKey = "ui/last_closed_note_id";
 constexpr auto kRecentFontsKey = "ui/recent_fonts";
 constexpr auto kGlobalFontFamilyKey = "ui/global_font_family";
 constexpr auto kGlobalFontPointSizeKey = "ui/global_font_point_size";
+constexpr auto kGlobalSimplePasswordVerifierKey = "security/global_simple_password_verifier";
+constexpr auto kGlobalRecoveryPasswordVerifierKey = "security/global_recovery_password_verifier";
 constexpr int kMaxRecentFonts = 8;
 constexpr int kDefaultFontPointSize = 14;
 
@@ -47,6 +49,9 @@ ApplicationController::ApplicationController(QObject *parent)
 
 bool ApplicationController::initialize(QString *errorMessage)
 {
+    if (!NoteCrypto::initialize(errorMessage)) {
+        return false;
+    }
     return repository_.initialize(errorMessage);
 }
 
@@ -254,6 +259,258 @@ int ApplicationController::openWindowCount() const
     return count;
 }
 
+bool ApplicationController::hasEncryptionPasswordsConfigured() const
+{
+    return !settings_.value(QLatin1StringView(kGlobalSimplePasswordVerifierKey))
+                .toByteArray()
+                .isEmpty()
+           && !settings_.value(QLatin1StringView(kGlobalRecoveryPasswordVerifierKey))
+                   .toByteArray()
+                   .isEmpty();
+}
+
+bool ApplicationController::hasCachedEncryptionPasswords() const
+{
+    return !cachedSimplePassword_.isEmpty() && !cachedRecoveryPassword_.isEmpty();
+}
+
+bool ApplicationController::setupGlobalEncryptionPasswords(const QString &simplePassword,
+                                                           const QString &recoveryPassword,
+                                                           QString *errorMessage)
+{
+    if (simplePassword == recoveryPassword) {
+        if (errorMessage != nullptr) {
+            *errorMessage = QStringLiteral("简单密码和复杂恢复密码不能相同。");
+        }
+        return false;
+    }
+
+    QString validationError;
+    if (!NoteCrypto::looksAcceptableSimplePassword(simplePassword, &validationError)
+        || !NoteCrypto::looksStrongRecoveryPassword(recoveryPassword, &validationError)) {
+        if (errorMessage != nullptr) {
+            *errorMessage = validationError;
+        }
+        return false;
+    }
+
+    QByteArray simpleVerifier;
+    QByteArray recoveryVerifier;
+    if (!NoteCrypto::createPasswordVerifier(simplePassword, &simpleVerifier, errorMessage)
+        || !NoteCrypto::createPasswordVerifier(recoveryPassword, &recoveryVerifier, errorMessage)) {
+        NoteCrypto::wipe(&simpleVerifier);
+        NoteCrypto::wipe(&recoveryVerifier);
+        return false;
+    }
+
+    settings_.setValue(QLatin1StringView(kGlobalSimplePasswordVerifierKey), simpleVerifier);
+    settings_.setValue(QLatin1StringView(kGlobalRecoveryPasswordVerifierKey), recoveryVerifier);
+    cacheSimplePassword(simplePassword);
+    cacheRecoveryPassword(recoveryPassword);
+    return true;
+}
+
+bool ApplicationController::unlockGlobalEncryptionPasswords(const QString &simplePassword,
+                                                            const QString &recoveryPassword,
+                                                            QString *errorMessage)
+{
+    if (!hasEncryptionPasswordsConfigured()) {
+        if (errorMessage != nullptr) {
+            *errorMessage = QStringLiteral("当前还没有设置全局加密密码。");
+        }
+        return false;
+    }
+
+    const QByteArray simpleVerifier =
+        settings_.value(QLatin1StringView(kGlobalSimplePasswordVerifierKey)).toByteArray();
+    const QByteArray recoveryVerifier =
+        settings_.value(QLatin1StringView(kGlobalRecoveryPasswordVerifierKey)).toByteArray();
+    if (!NoteCrypto::verifyPasswordVerifier(simplePassword, simpleVerifier)
+        || !NoteCrypto::verifyPasswordVerifier(recoveryPassword, recoveryVerifier)) {
+        if (errorMessage != nullptr) {
+            *errorMessage = QStringLiteral("输入的全局密码不正确。");
+        }
+        return false;
+    }
+
+    cacheSimplePassword(simplePassword);
+    cacheRecoveryPassword(recoveryPassword);
+    return true;
+}
+
+bool ApplicationController::changeSimpleEncryptionPassword(const QString &currentSimplePassword,
+                                                           const QString &currentRecoveryPassword,
+                                                           const QString &newSimplePassword,
+                                                           QString *errorMessage)
+{
+    if (newSimplePassword == currentRecoveryPassword) {
+        if (errorMessage != nullptr) {
+            *errorMessage = QStringLiteral("简单密码和复杂恢复密码不能相同。");
+        }
+        return false;
+    }
+
+    QString validationError;
+    if (!NoteCrypto::looksAcceptableSimplePassword(newSimplePassword, &validationError)) {
+        if (errorMessage != nullptr) {
+            *errorMessage = validationError;
+        }
+        return false;
+    }
+
+    if (!unlockGlobalEncryptionPasswords(currentSimplePassword,
+                                         currentRecoveryPassword,
+                                         errorMessage)) {
+        return false;
+    }
+
+    if (!repository_.rewrapSimplePassword(currentSimplePassword,
+                                          newSimplePassword,
+                                          errorMessage)) {
+        return false;
+    }
+
+    QByteArray verifier;
+    if (!NoteCrypto::createPasswordVerifier(newSimplePassword, &verifier, errorMessage)) {
+        NoteCrypto::wipe(&verifier);
+        return false;
+    }
+
+    settings_.setValue(QLatin1StringView(kGlobalSimplePasswordVerifierKey), verifier);
+    cacheSimplePassword(newSimplePassword);
+    cacheRecoveryPassword(currentRecoveryPassword);
+    emit notesChanged();
+    return true;
+}
+
+bool ApplicationController::changeRecoveryEncryptionPassword(const QString &currentSimplePassword,
+                                                             const QString &currentRecoveryPassword,
+                                                             const QString &newRecoveryPassword,
+                                                             QString *errorMessage)
+{
+    if (currentSimplePassword == newRecoveryPassword) {
+        if (errorMessage != nullptr) {
+            *errorMessage = QStringLiteral("简单密码和复杂恢复密码不能相同。");
+        }
+        return false;
+    }
+
+    QString validationError;
+    if (!NoteCrypto::looksStrongRecoveryPassword(newRecoveryPassword, &validationError)) {
+        if (errorMessage != nullptr) {
+            *errorMessage = validationError;
+        }
+        return false;
+    }
+
+    if (!unlockGlobalEncryptionPasswords(currentSimplePassword,
+                                         currentRecoveryPassword,
+                                         errorMessage)) {
+        return false;
+    }
+
+    if (!repository_.rewrapRecoveryPassword(currentRecoveryPassword,
+                                            newRecoveryPassword,
+                                            errorMessage)) {
+        return false;
+    }
+
+    QByteArray verifier;
+    if (!NoteCrypto::createPasswordVerifier(newRecoveryPassword, &verifier, errorMessage)) {
+        NoteCrypto::wipe(&verifier);
+        return false;
+    }
+
+    settings_.setValue(QLatin1StringView(kGlobalRecoveryPasswordVerifierKey), verifier);
+    cacheSimplePassword(currentSimplePassword);
+    cacheRecoveryPassword(newRecoveryPassword);
+    emit notesChanged();
+    return true;
+}
+
+void ApplicationController::clearCachedEncryptionPasswords()
+{
+    NoteCrypto::wipe(&cachedSimplePassword_);
+    NoteCrypto::wipe(&cachedRecoveryPassword_);
+}
+
+NoteEncryptionResult ApplicationController::enableNoteEncryption(qint64 id,
+                                                                 const QString &title,
+                                                                 const QString &content)
+{
+    NoteEncryptionResult result;
+    if (!hasCachedEncryptionPasswords()) {
+        result.errorMessage = QStringLiteral("当前尚未输入全局加密密码。");
+        return result;
+    }
+
+    result = repository_.enableEncryption(id,
+                                          title,
+                                          content,
+                                          QString::fromUtf8(cachedSimplePassword_),
+                                          QString::fromUtf8(cachedRecoveryPassword_));
+    if (result.success) {
+        emit notesChanged();
+    }
+    return result;
+}
+
+NoteUnlockAttemptResult ApplicationController::unlockNoteWithSimplePassword(qint64 id,
+                                                                            const QString &password)
+{
+    NoteUnlockAttemptResult result = repository_.unlockWithSimplePassword(id, password);
+    if (result.status == NoteCrypto::UnlockStatus::Success) {
+        cacheSimplePassword(password);
+    }
+    if (result.status == NoteCrypto::UnlockStatus::Success
+        || result.status == NoteCrypto::UnlockStatus::RecoveryPasswordRequired
+        || result.status == NoteCrypto::UnlockStatus::WrongPassword) {
+        emit notesChanged();
+    }
+    return result;
+}
+
+NoteUnlockAttemptResult ApplicationController::unlockNoteWithRecoveryPassword(qint64 id,
+                                                                              const QString &password)
+{
+    NoteUnlockAttemptResult result = repository_.unlockWithRecoveryPassword(id, password);
+    if (result.status == NoteCrypto::UnlockStatus::Success) {
+        cacheRecoveryPassword(password);
+    }
+    if (result.status == NoteCrypto::UnlockStatus::Success) {
+        emit notesChanged();
+    }
+    return result;
+}
+
+bool ApplicationController::saveEncryptedNote(qint64 id,
+                                              const QString &title,
+                                              const QString &content,
+                                              const QByteArray &dataKey,
+                                              QString *errorMessage)
+{
+    if (!repository_.updateEncryptedNote(id, title, content, dataKey, errorMessage)) {
+        return false;
+    }
+
+    emit notesChanged();
+    return true;
+}
+
+bool ApplicationController::disableNoteEncryption(qint64 id,
+                                                  const QString &title,
+                                                  const QString &content,
+                                                  QString *errorMessage)
+{
+    if (!repository_.disableEncryption(id, title, content, errorMessage)) {
+        return false;
+    }
+
+    emit noteTitleChanged(id, title);
+    emit notesChanged();
+    return true;
+}
+
 SortMode ApplicationController::sortMode() const
 {
     return static_cast<SortMode>(
@@ -372,6 +629,18 @@ void ApplicationController::openWindowFor(const NoteData &note)
     window->show();
     window->raise();
     window->activateWindow();
+}
+
+void ApplicationController::cacheSimplePassword(const QString &password)
+{
+    NoteCrypto::wipe(&cachedSimplePassword_);
+    cachedSimplePassword_ = password.toUtf8();
+}
+
+void ApplicationController::cacheRecoveryPassword(const QString &password)
+{
+    NoteCrypto::wipe(&cachedRecoveryPassword_);
+    cachedRecoveryPassword_ = password.toUtf8();
 }
 
 void ApplicationController::removeWindow(NoteWindow *window)

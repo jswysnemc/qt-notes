@@ -7,6 +7,7 @@
 #include <QItemSelectionModel>
 #include <QLabel>
 #include <QListView>
+#include <QMessageBox>
 #include <QPainter>
 #include <QPushButton>
 #include <QScreen>
@@ -51,12 +52,31 @@ public:
 
         const QRect titleRect = card.adjusted(10, 8, -10, -18);
         const QRect timeRect = card.adjusted(10, 26, -10, -6);
+        const bool encrypted = index.data(NoteListModel::EncryptedRole).toBool();
+        const bool recoveryRequired = index.data(NoteListModel::RecoveryRequiredRole).toBool();
+        QRect adjustedTitleRect = titleRect;
+
+        if (encrypted) {
+            const QString badgeText =
+                recoveryRequired ? QStringLiteral("已锁定") : QStringLiteral("已加密");
+            const QFontMetrics badgeMetrics(option.font);
+            const int badgeWidth = badgeMetrics.horizontalAdvance(badgeText) + 14;
+            const QRect badgeRect(card.right() - badgeWidth - 10, card.top() + 8, badgeWidth, 20);
+
+            adjustedTitleRect.setRight(badgeRect.left() - 10);
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(recoveryRequired ? QColor(QStringLiteral("#B94A48"))
+                                               : theme_.borderColor);
+            painter->drawRoundedRect(badgeRect, 10, 10);
+            painter->setPen(QColor(QStringLiteral("#FFF8F8")));
+            painter->drawText(badgeRect, Qt::AlignCenter, badgeText);
+        }
 
         QFont titleFont = option.font;
         titleFont.setWeight(QFont::DemiBold);
         painter->setFont(titleFont);
         painter->setPen(theme_.textColor);
-        painter->drawText(titleRect,
+        painter->drawText(adjustedTitleRect,
                           Qt::AlignLeft | Qt::AlignVCenter | Qt::TextSingleLine,
                           index.data(NoteListModel::TitleRole).toString());
 
@@ -440,8 +460,16 @@ void NoteListPopup::renameNoteAt(const QModelIndex &index)
 
     const qint64 noteId = index.data(NoteListModel::IdRole).toLongLong();
     const QString currentTitle = index.data(NoteListModel::TitleRole).toString().trimmed();
+    const bool encrypted = index.data(NoteListModel::EncryptedRole).toBool();
 
     hide();
+
+    if (encrypted) {
+        QMessageBox::information(parentWidget(),
+                                 QStringLiteral("便签已加密"),
+                                 QStringLiteral("加密便签需要先在对应窗口里解锁后再修改标题。"));
+        return;
+    }
 
     bool accepted = false;
     const QString nextTitle = QInputDialog::getText(parentWidget(),

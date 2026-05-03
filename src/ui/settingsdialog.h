@@ -24,6 +24,9 @@ public:
                    const QStringList &recentFonts,
                    SortMode sortMode,
                    StartupNoteMode startupNoteMode,
+                   bool noteEncrypted,
+                   bool encryptionCanBeDisabled,
+                   bool encryptionPasswordsConfigured,
                    const ThemeSpec &theme,
                    QWidget *parent = nullptr);
 
@@ -32,6 +35,10 @@ public:
     int fontPointSize() const;
     SortMode sortMode() const;
     StartupNoteMode startupNoteMode() const;
+    bool securityActionRequested() const;
+    bool disableEncryptionRequested() const;
+    bool changeSimplePasswordRequested() const;
+    bool changeRecoveryPasswordRequested() const;
     bool deleteRequested() const;
 
 private:
@@ -45,6 +52,14 @@ private:
     QSpinBox *fontSizeSpinBox_ = nullptr;
     QComboBox *sortModeCombo_ = nullptr;
     QComboBox *startupModeCombo_ = nullptr;
+    QPushButton *securityActionButton_ = nullptr;
+    QPushButton *disableEncryptionButton_ = nullptr;
+    QPushButton *changeSimplePasswordButton_ = nullptr;
+    QPushButton *changeRecoveryPasswordButton_ = nullptr;
     QPushButton *deleteButton_ = nullptr;
+    bool securityActionRequested_ = false;
+    bool disableEncryptionRequested_ = false;
+    bool changeSimplePasswordRequested_ = false;
+    bool changeRecoveryPasswordRequested_ = false;
     bool deleteRequested_ = false;
 };

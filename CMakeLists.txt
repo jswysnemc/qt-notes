@@ -10,7 +10,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
+find_package(PkgConfig REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql)
+pkg_check_modules(Libsodium REQUIRED IMPORTED_TARGET libsodium)
+pkg_check_modules(Libsecret REQUIRED IMPORTED_TARGET libsecret-1)
 
 qt_add_executable(qt-notes
     src/main.cpp
@@ -22,12 +25,18 @@ qt_add_executable(qt-notes
     src/data/notesrepository.h
     src/model/notelistmodel.cpp
     src/model/notelistmodel.h
+    src/security/notecrypto.cpp
+    src/security/notecrypto.h
+    src/security/unlockstatestore.cpp
+    src/security/unlockstatestore.h
     src/theme/themecatalog.cpp
     src/theme/themecatalog.h
     src/ui/iconfactory.cpp
     src/ui/iconfactory.h
     src/ui/noteeditor.cpp
     src/ui/noteeditor.h
+    src/ui/noteencryptiondialog.cpp
+    src/ui/noteencryptiondialog.h
     src/ui/notelistpopup.cpp
     src/ui/notelistpopup.h
     src/ui/settingsdialog.cpp
@@ -45,6 +54,8 @@ target_link_libraries(qt-notes PRIVATE
     Qt6::Gui
     Qt6::Widgets
     Qt6::Sql
+    PkgConfig::Libsodium
+    PkgConfig::Libsecret
 )
 
 install(TARGETS qt-notes RUNTIME DESTINATION bin)

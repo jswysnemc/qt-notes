@@ -68,6 +68,26 @@ QIcon IconFactory::settingsIcon(const QColor &color)
     });
 }
 
+QIcon IconFactory::lockClosedIcon(const QColor &color)
+{
+    return iconFromPainter([&color](QPainter &painter) {
+        painter.setPen(themedPen(color));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawRoundedRect(QRectF(4.5, 8.0, 9.0, 6.5), 2.0, 2.0);
+        painter.drawArc(QRectF(5.3, 3.3, 7.4, 7.2), 0, 16 * 180);
+    });
+}
+
+QIcon IconFactory::lockOpenIcon(const QColor &color)
+{
+    return iconFromPainter([&color](QPainter &painter) {
+        painter.setPen(themedPen(color));
+        painter.setBrush(Qt::NoBrush);
+        painter.drawRoundedRect(QRectF(4.5, 8.0, 9.0, 6.5), 2.0, 2.0);
+        painter.drawArc(QRectF(3.6, 3.4, 7.4, 7.2), 16 * 18, 16 * 210);
+    });
+}
+
 QIcon IconFactory::plusIcon(const QColor &color)
 {
     return iconFromPainter([&color](QPainter &painter) {

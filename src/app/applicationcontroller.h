@@ -36,6 +36,39 @@ public:
     int openWindowCount() const;
     qint64 startupNoteId();
 
+    bool hasEncryptionPasswordsConfigured() const;
+    bool hasCachedEncryptionPasswords() const;
+    bool setupGlobalEncryptionPasswords(const QString &simplePassword,
+                                        const QString &recoveryPassword,
+                                        QString *errorMessage = nullptr);
+    bool unlockGlobalEncryptionPasswords(const QString &simplePassword,
+                                         const QString &recoveryPassword,
+                                         QString *errorMessage = nullptr);
+    bool changeSimpleEncryptionPassword(const QString &currentSimplePassword,
+                                        const QString &currentRecoveryPassword,
+                                        const QString &newSimplePassword,
+                                        QString *errorMessage = nullptr);
+    bool changeRecoveryEncryptionPassword(const QString &currentSimplePassword,
+                                          const QString &currentRecoveryPassword,
+                                          const QString &newRecoveryPassword,
+                                          QString *errorMessage = nullptr);
+    void clearCachedEncryptionPasswords();
+
+    NoteEncryptionResult enableNoteEncryption(qint64 id,
+                                              const QString &title,
+                                              const QString &content);
+    NoteUnlockAttemptResult unlockNoteWithSimplePassword(qint64 id, const QString &password);
+    NoteUnlockAttemptResult unlockNoteWithRecoveryPassword(qint64 id, const QString &password);
+    bool saveEncryptedNote(qint64 id,
+                           const QString &title,
+                           const QString &content,
+                           const QByteArray &dataKey,
+                           QString *errorMessage = nullptr);
+    bool disableNoteEncryption(qint64 id,
+                               const QString &title,
+                               const QString &content,
+                               QString *errorMessage = nullptr);
+
     SortMode sortMode() const;
     void setSortMode(SortMode sortMode);
     StartupNoteMode startupNoteMode() const;
@@ -61,8 +94,12 @@ signals:
 private:
     void openWindowFor(const NoteData &note);
     void removeWindow(NoteWindow *window);
+    void cacheSimplePassword(const QString &password);
+    void cacheRecoveryPassword(const QString &password);
 
     NotesRepository repository_;
     QSettings settings_;
     QMap<qint64, QPointer<NoteWindow>> windows_;
+    QByteArray cachedSimplePassword_;
+    QByteArray cachedRecoveryPassword_;
 };

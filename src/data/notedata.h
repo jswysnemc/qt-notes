@@ -28,6 +28,9 @@ struct NoteData {
     QString fontFamily;
     int fontPointSize = 14;
     QByteArray windowGeometry;
+    bool isEncrypted = false;
+    int failedUnlockAttempts = 0;
+    bool recoveryPasswordRequired = false;
 };
 
 struct NoteSummary {
@@ -36,11 +39,26 @@ struct NoteSummary {
     qint64 createdAt = 0;
     qint64 updatedAt = 0;
     QString themeId;
+    bool isEncrypted = false;
+    bool recoveryPasswordRequired = false;
 };
 
 inline QString timestampTitle(qint64 msecsSinceEpoch)
 {
     return QDateTime::fromMSecsSinceEpoch(msecsSinceEpoch).toString(QStringLiteral("yyyy-MM-dd HH:mm:ss"));
+}
+
+inline QString maskedEncryptedTitle(const QString &title)
+{
+    const QString normalized = title.trimmed();
+    if (normalized.isEmpty()) {
+        return QStringLiteral("已加密便签");
+    }
+
+    const int totalLength = normalized.size();
+    const int keepLength = qMax(1, (totalLength + 1) / 2);
+    const int maskLength = qMax(1, totalLength - keepLength);
+    return normalized.left(keepLength) + QString(maskLength, QLatin1Char('*'));
 }
 
 inline QString newTimestampTitle()

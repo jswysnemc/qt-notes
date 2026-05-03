@@ -19,6 +19,8 @@ public:
     void setTitle(const QString &title);
     QString title() const;
     void setTheme(const ThemeSpec &theme);
+    void setSecurityState(bool encrypted, bool unlocked);
+    void setTitleEditable(bool editable);
 
     QWidget *themeButtonWidget() const;
     QWidget *listButtonWidget() const;
@@ -27,6 +29,7 @@ signals:
     void listRequested();
     void themeRequested();
     void settingsRequested();
+    void securityRequested();
     void newNoteRequested();
     void closeRequested();
     void titleEdited(const QString &title);
@@ -47,10 +50,14 @@ private:
     QToolButton *listButton_ = nullptr;
     QToolButton *themeButton_ = nullptr;
     QToolButton *settingsButton_ = nullptr;
+    QToolButton *securityButton_ = nullptr;
     QToolButton *newButton_ = nullptr;
     QToolButton *closeButton_ = nullptr;
     ThemeSpec theme_;
     bool titlePressed_ = false;
+    bool titleEditable_ = true;
+    bool encrypted_ = false;
+    bool unlocked_ = false;
     QPoint pressPosition_;
     QString stableTitle_;
 };
