@@ -52,7 +52,10 @@ qt_add_executable(qt-notes
     src/ui/notewindow.h
 )
 
-qt_add_translations(qt-notes TS_FILES ${TS_FILES})
+qt_add_translations(qt-notes
+    TS_FILES ${TS_FILES}
+    QM_FILES_OUTPUT_VARIABLE QM_FILES
+)
 
 target_include_directories(qt-notes PRIVATE src)
 
@@ -66,6 +69,4 @@ target_link_libraries(qt-notes PRIVATE
 )
 
 install(TARGETS qt-notes RUNTIME DESTINATION bin)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/translations/qt-notes_zh_CN.qm
-              ${CMAKE_CURRENT_BINARY_DIR}/translations/qt-notes_en.qm
-        DESTINATION share/qt-notes/translations)
+install(FILES ${QM_FILES} DESTINATION share/qt-notes/translations)
