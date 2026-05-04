@@ -24,4 +24,5 @@ class ThemeCatalog
 public:
     static const QVector<ThemeSpec> &themes();
     static ThemeSpec themeById(const QString &themeId);
+    static QString displayName(const ThemeSpec &theme);
 };

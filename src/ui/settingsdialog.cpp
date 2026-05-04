@@ -253,6 +253,9 @@ QScrollBar::handle:vertical {
     border-radius: 4px;
     background: %3;
 }
+QScrollBar::handle:vertical:hover {
+    background: %4;
+}
 QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical,
 QScrollBar::add-page:vertical,
@@ -263,7 +266,8 @@ QScrollBar::sub-page:vertical {
 )")
                            .arg(mixedColor(theme.borderColor, theme.accentColor, 0.16).name(),
                                 mixedColor(theme.editorColor, theme.surfaceColor, 0.08).name(),
-                                mixedColor(theme.hoverColor, theme.borderColor, 0.42).name()));
+                                mixedColor(theme.hoverColor, theme.borderColor, 0.42).name(),
+                                theme.accentColor.name()));
 }
 
 void setupModernComboBox(QComboBox *combo, const ThemeSpec &theme)

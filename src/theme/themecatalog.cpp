@@ -1,5 +1,7 @@
 #include "theme/themecatalog.h"
 
+#include <QCoreApplication>
+
 const QVector<ThemeSpec> &ThemeCatalog::themes()
 {
     static const QVector<ThemeSpec> kThemes = {
@@ -77,4 +79,25 @@ ThemeSpec ThemeCatalog::themeById(const QString &themeId)
     }
 
     return themes().front();
+}
+
+QString ThemeCatalog::displayName(const ThemeSpec &theme)
+{
+    if (theme.id == QLatin1StringView("paper")) {
+        return QCoreApplication::translate("ThemeCatalog", "Paper");
+    }
+    if (theme.id == QLatin1StringView("mint")) {
+        return QCoreApplication::translate("ThemeCatalog", "Mint");
+    }
+    if (theme.id == QLatin1StringView("ocean")) {
+        return QCoreApplication::translate("ThemeCatalog", "Ocean");
+    }
+    if (theme.id == QLatin1StringView("rose")) {
+        return QCoreApplication::translate("ThemeCatalog", "Rose");
+    }
+    if (theme.id == QLatin1StringView("graphite")) {
+        return QCoreApplication::translate("ThemeCatalog", "Graphite");
+    }
+
+    return theme.name;
 }

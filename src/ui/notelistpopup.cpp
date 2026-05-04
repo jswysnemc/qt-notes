@@ -21,6 +21,8 @@ namespace {
 
 class NoteListDelegate : public QStyledItemDelegate
 {
+    Q_DECLARE_TR_FUNCTIONS(NoteListDelegate)
+
 public:
     explicit NoteListDelegate(QObject *parent = nullptr)
         : QStyledItemDelegate(parent)
@@ -259,6 +261,9 @@ QScrollBar::handle:vertical {
     border-radius: 4px;
     background: %5;
 }
+QScrollBar::handle:vertical:hover {
+    background: %7;
+}
 QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical,
 QScrollBar::add-page:vertical,
@@ -272,7 +277,8 @@ QScrollBar::sub-page:vertical {
                            theme.borderColor.name(),
                            theme.mutedTextColor.name(),
                            theme.hoverColor.name(),
-                           theme.editorColor.name()));
+                           theme.editorColor.name(),
+                           theme.accentColor.name()));
 }
 
 void NoteListPopup::popupBelow(QWidget *anchor)

@@ -5,11 +5,14 @@
 #include <QTextEdit>
 
 class QContextMenuEvent;
+class QEvent;
 class QDialog;
 class QImage;
 class QMimeData;
 class QMouseEvent;
 class QTextCursor;
+class QUrl;
+class QWheelEvent;
 class QWidget;
 
 class NoteEditor : public QTextEdit
@@ -33,9 +36,11 @@ signals:
 
 protected:
     bool canInsertFromMimeData(const QMimeData *source) const override;
+    void changeEvent(QEvent *event) override;
     void contextMenuEvent(QContextMenuEvent *event) override;
     void insertFromMimeData(const QMimeData *source) override;
     void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
 
@@ -48,11 +53,14 @@ private:
     bool insertImagesFromMimeData(const QMimeData *source);
     bool insertImage(const QImage &image);
     QImage loadImage(const QString &imageUrl) const;
+    QUrl linkAtPosition(const QPoint &position) const;
+    void openUrl(const QUrl &url) const;
     bool persistRichImageDocument(bool encryptedStorage,
                                   QString *content,
                                   QString *errorMessage);
     void preloadImageResources(const QString &html);
     QImage normalizedImage(const QImage &image, bool *scaled = nullptr) const;
+    void updateUrlHighlights();
     void showImagePreview(const QImage &image);
     QString storeImage(const QImage &image, bool *scaled = nullptr) const;
 

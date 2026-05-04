@@ -164,6 +164,10 @@ QScrollBar::handle:horizontal {
     border-radius: 4px;
     background: %5;
 }
+QScrollBar::handle:vertical:hover,
+QScrollBar::handle:horizontal:hover {
+    background: %6;
+}
 QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical,
 QScrollBar::add-page:vertical,
@@ -180,17 +184,20 @@ QScrollBar::sub-page:horizontal {
              theme.textColor.name(),
              theme.selectionColor.name(),
              theme.selectionTextColor.name(),
-             theme.hoverColor.name());
+             theme.hoverColor.name(),
+             theme.accentColor.name());
 }
 
 QString lockedNotePlaceholderText(bool recoveryPasswordRequired)
 {
     if (recoveryPasswordRequired) {
-        return QStringLiteral(
+        return QCoreApplication::translate(
+            "NoteWindow",
             "This note is locked.\n\nAfter 3 failed attempts, the recovery password is required.\nThe title is partially visible for identification. Use the unlock button in settings to continue.");
     }
 
-    return QStringLiteral(
+    return QCoreApplication::translate(
+        "NoteWindow",
         "This note is encrypted.\n\nUse the unlock button in settings and enter the simple password to unlock.\nUntil unlocked, only a partial title is shown.");
 }
 
@@ -480,6 +487,7 @@ QFrame#windowSurface {
     palette.setColor(QPalette::Text, theme_.textColor);
     palette.setColor(QPalette::Highlight, theme_.selectionColor);
     palette.setColor(QPalette::HighlightedText, theme_.selectionTextColor);
+    palette.setColor(QPalette::Link, theme_.accentColor);
     editor_->setPalette(palette);
 }
 
@@ -657,7 +665,8 @@ QMenu::item:selected {
 
     for (const ThemeSpec &theme : ThemeCatalog::themes()) {
         QAction *action = menu.addAction(
-            IconFactory::swatchIcon(theme.titleBarColor, theme.borderColor), theme.name);
+            IconFactory::swatchIcon(theme.titleBarColor, theme.borderColor),
+            ThemeCatalog::displayName(theme));
         action->setData(theme.id);
         if (theme.id == note_.themeId) {
             action->setCheckable(true);

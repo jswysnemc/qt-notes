@@ -6,6 +6,7 @@
 #include <QClipboard>
 #include <QContextMenuEvent>
 #include <QDateTime>
+#include <QDesktopServices>
 #include <QDialog>
 #include <QDir>
 #include <QDialogButtonBox>
@@ -81,6 +82,29 @@ bool isNoteAssetUrl(const QString &imageName, QString *assetId = nullptr)
         *assetId = resolvedAssetId;
     }
     return true;
+}
+
+const QRegularExpression &urlPattern()
+{
+    static const QRegularExpression pattern(
+        QStringLiteral(R"(\b((?:https?|ftp)://[^\s<>"']+|www\.[^\s<>"']+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}))"),
+        QRegularExpression::CaseInsensitiveOption);
+    return pattern;
+}
+
+QUrl normalizedExternalUrl(QString text)
+{
+    while (!text.isEmpty() && QStringLiteral(".,;:!?)]}").contains(text.back())) {
+        text.chop(1);
+    }
+
+    if (text.contains(QLatin1Char('@')) && !text.contains(QStringLiteral("://"))) {
+        return QUrl(QStringLiteral("mailto:") + text);
+    }
+    if (text.startsWith(QStringLiteral("www."), Qt::CaseInsensitive)) {
+        return QUrl(QStringLiteral("https://") + text);
+    }
+    return QUrl(text);
 }
 
 bool documentContainsImages(const QTextDocument *document)
@@ -208,6 +232,10 @@ NoteEditor::NoteEditor(QWidget *parent)
     setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     setTabStopDistance(28.0);
+    setMouseTracking(true);
+    viewport()->setMouseTracking(true);
+
+    connect(this, &QTextEdit::textChanged, this, &NoteEditor::updateUrlHighlights);
 }
 
 void NoteEditor::setCurrentNoteId(qint64 noteId)
@@ -235,10 +263,12 @@ void NoteEditor::loadContent(const QString &content)
         const QString html = content.mid(kRichContentPrefix.size());
         preloadImageResources(html);
         setHtml(html);
+        updateUrlHighlights();
         return;
     }
 
     setPlainText(content);
+    updateUrlHighlights();
 }
 
 void NoteEditor::resetTransientState()
@@ -321,11 +351,22 @@ bool NoteEditor::canInsertFromMimeData(const QMimeData *source) const
     return QTextEdit::canInsertFromMimeData(source);
 }
 
+void NoteEditor::changeEvent(QEvent *event)
+{
+    QTextEdit::changeEvent(event);
+
+    if (event->type() == QEvent::PaletteChange) {
+        updateUrlHighlights();
+    }
+}
+
 void NoteEditor::contextMenuEvent(QContextMenuEvent *event)
 {
     const QTextCursor imageCursor = imageCursorAt(event->pos());
+    const QUrl linkUrl = linkAtPosition(event->pos());
     const QTextCursor currentCursor = textCursor();
     const bool hasImage = !imageCursor.isNull();
+    const bool hasLink = linkUrl.isValid();
     const bool hasSelection = currentCursor.hasSelection();
     const bool readOnly = isReadOnly();
     const bool canUndo = document()->isUndoAvailable();
@@ -387,6 +428,12 @@ QMenu::separator {
     QAction *previewAction = nullptr;
     QAction *copyImageAction = nullptr;
     QAction *deleteImageAction = nullptr;
+    QAction *openLinkAction = nullptr;
+    if (hasLink) {
+        openLinkAction = menu.addAction(tr("Open link"));
+        menu.addSeparator();
+    }
+
     if (hasImage) {
         previewAction = menu.addAction(tr("Preview image"));
         copyImageAction = menu.addAction(tr("Copy image"));
@@ -420,6 +467,11 @@ QMenu::separator {
     selectAllAction->setEnabled(canSelectAllContent);
     QAction *selected = menu.exec(event->globalPos());
     if (selected == nullptr) {
+        return;
+    }
+
+    if (selected == openLinkAction) {
+        openUrl(linkUrl);
         return;
     }
 
@@ -510,8 +562,31 @@ void NoteEditor::mousePressEvent(QMouseEvent *event)
     QTextEdit::mousePressEvent(event);
 }
 
+void NoteEditor::mouseMoveEvent(QMouseEvent *event)
+{
+    QTextEdit::mouseMoveEvent(event);
+
+    const QUrl linkUrl = linkAtPosition(event->position().toPoint());
+    if (linkUrl.isValid()) {
+        viewport()->setCursor(Qt::PointingHandCursor);
+        return;
+    }
+
+    viewport()->setCursor(Qt::IBeamCursor);
+}
+
 void NoteEditor::mouseReleaseEvent(QMouseEvent *event)
 {
+    const QUrl linkUrl = linkAtPosition(event->position().toPoint());
+    if (event->button() == Qt::LeftButton && linkUrl.isValid()
+        && (event->modifiers().testFlag(Qt::ControlModifier)
+            || event->modifiers().testFlag(Qt::MetaModifier))) {
+        openUrl(linkUrl);
+        pressedImageCursorPosition_ = -1;
+        event->accept();
+        return;
+    }
+
     QTextEdit::mouseReleaseEvent(event);
 
     if (event->button() != Qt::LeftButton || pressedImageCursorPosition_ < 0) {
@@ -750,6 +825,35 @@ QImage NoteEditor::loadImage(const QString &imageUrl) const
     return readStoredImageFromFile(localFilePathFromImageName(imageUrl));
 }
 
+QUrl NoteEditor::linkAtPosition(const QPoint &position) const
+{
+    const QTextCursor cursor = cursorForPosition(position);
+    const int cursorPosition = cursor.position();
+    const QString text = toPlainText();
+    QRegularExpressionMatchIterator matches = urlPattern().globalMatch(text);
+    while (matches.hasNext()) {
+        const QRegularExpressionMatch match = matches.next();
+        const int start = match.capturedStart(1);
+        const int end = match.capturedEnd(1);
+        if (cursorPosition < start || cursorPosition > end) {
+            continue;
+        }
+
+        return normalizedExternalUrl(match.captured(1));
+    }
+
+    return {};
+}
+
+void NoteEditor::openUrl(const QUrl &url) const
+{
+    if (!url.isValid()) {
+        return;
+    }
+
+    QDesktopServices::openUrl(url);
+}
+
 bool NoteEditor::persistRichImageDocument(bool encryptedStorage,
                                           QString *content,
                                           QString *errorMessage)
@@ -903,6 +1007,25 @@ void NoteEditor::preloadImageResources(const QString &html)
             }
         }
     }
+}
+
+void NoteEditor::updateUrlHighlights()
+{
+    QList<QTextEdit::ExtraSelection> selections;
+    const QString text = toPlainText();
+    QRegularExpressionMatchIterator matches = urlPattern().globalMatch(text);
+    while (matches.hasNext()) {
+        const QRegularExpressionMatch match = matches.next();
+        QTextEdit::ExtraSelection selection;
+        selection.cursor = QTextCursor(document());
+        selection.cursor.setPosition(match.capturedStart(1));
+        selection.cursor.setPosition(match.capturedEnd(1), QTextCursor::KeepAnchor);
+        selection.format.setForeground(palette().color(QPalette::Link));
+        selection.format.setFontUnderline(true);
+        selections.append(selection);
+    }
+
+    setExtraSelections(selections);
 }
 
 QImage NoteEditor::normalizedImage(const QImage &image, bool *scaled) const

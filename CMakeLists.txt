@@ -20,6 +20,11 @@ set(TS_FILES
     translations/qt-notes_en.ts
 )
 
+set(QM_FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/qt-notes_zh_CN.qm
+    ${CMAKE_CURRENT_BINARY_DIR}/qt-notes_en.qm
+)
+
 qt_add_executable(qt-notes
     src/main.cpp
     src/app/applicationcontroller.cpp
@@ -54,7 +59,7 @@ qt_add_executable(qt-notes
 
 qt_add_translations(qt-notes
     TS_FILES ${TS_FILES}
-    QM_FILES_OUTPUT_VARIABLE QM_FILES
+    RESOURCE_PREFIX "/i18n"
 )
 
 target_include_directories(qt-notes PRIVATE src)

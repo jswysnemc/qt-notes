@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QDebug>
+#include <QDir>
 #include <QFileInfo>
 #include <QLibraryInfo>
 #include <QLocale>
@@ -29,13 +30,19 @@ int main(int argc, char *argv[])
     }
 
     QTranslator appTranslator;
+    const QDir applicationDir(QCoreApplication::applicationDirPath());
     const QStringList searchPaths = {
+        QStringLiteral(":/i18n"),
+        applicationDir.path(),
+        applicationDir.filePath(QStringLiteral("../share/qt-notes/translations")),
         QStandardPaths::locate(QStandardPaths::AppDataLocation,
                                QStringLiteral("translations"),
                                QStandardPaths::LocateDirectory),
-        QStringLiteral(":/i18n"),
     };
     for (const QString &path : searchPaths) {
+        if (path.isEmpty()) {
+            continue;
+        }
         if (appTranslator.load(locale, QStringLiteral("qt-notes"), QStringLiteral("_"), path)) {
             app.installTranslator(&appTranslator);
             break;

@@ -257,117 +257,122 @@ Global encryption passwords have been set. Enter the same simple and recovery pa
 <context>
     <name>NoteEditor</name>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="205"/>
+        <location filename="../src/ui/noteeditor.cpp" line="230"/>
         <source>Start writing...</source>
         <translation>开始记录...</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="278"/>
+        <location filename="../src/ui/noteeditor.cpp" line="309"/>
         <source>Internal error: missing note content output</source>
         <translation>内部错误：缺少便签内容输出</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="391"/>
+        <location filename="../src/ui/noteeditor.cpp" line="434"/>
+        <source>Open link</source>
+        <translation>打开链接</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/noteeditor.cpp" line="439"/>
         <source>Preview image</source>
         <translation>预览图片</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="392"/>
+        <location filename="../src/ui/noteeditor.cpp" line="440"/>
         <source>Copy image</source>
         <translation>复制图片</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="393"/>
+        <location filename="../src/ui/noteeditor.cpp" line="441"/>
         <source>Delete image</source>
         <translation>删除图片</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="397"/>
+        <location filename="../src/ui/noteeditor.cpp" line="445"/>
         <source>Undo</source>
         <translation>撤销</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="400"/>
+        <location filename="../src/ui/noteeditor.cpp" line="448"/>
         <source>Redo</source>
         <translation>重做</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="405"/>
+        <location filename="../src/ui/noteeditor.cpp" line="453"/>
         <source>Cut</source>
         <translation>剪切</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="408"/>
+        <location filename="../src/ui/noteeditor.cpp" line="456"/>
         <source>Copy</source>
         <translation>复制</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="411"/>
+        <location filename="../src/ui/noteeditor.cpp" line="459"/>
         <source>Paste</source>
         <translation>粘贴</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="414"/>
+        <location filename="../src/ui/noteeditor.cpp" line="462"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="419"/>
+        <location filename="../src/ui/noteeditor.cpp" line="467"/>
         <source>Select all</source>
         <translation>全选</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="576"/>
+        <location filename="../src/ui/noteeditor.cpp" line="652"/>
         <source>This note is encrypted</source>
         <translation>当前便签已加密</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="577"/>
+        <location filename="../src/ui/noteeditor.cpp" line="653"/>
         <source>Encrypted notes do not support inserting image attachments.</source>
         <translation>加密便签暂不支持插入图片附件。</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="759"/>
+        <location filename="../src/ui/noteeditor.cpp" line="864"/>
         <source>Invalid note identifier</source>
         <translation>当前便签标识无效</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="767"/>
+        <location filename="../src/ui/noteeditor.cpp" line="872"/>
         <source>Invalid attachment encryption key</source>
         <translation>当前附件加密密钥无效</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="781"/>
+        <location filename="../src/ui/noteeditor.cpp" line="886"/>
         <source>Failed to create note attachment directory</source>
         <translation>无法创建便签附件目录</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="806"/>
+        <location filename="../src/ui/noteeditor.cpp" line="911"/>
         <source>Failed to read image attachment: %1</source>
         <translation>无法读取图片附件：%1</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="817"/>
+        <location filename="../src/ui/noteeditor.cpp" line="922"/>
         <source>Failed to encode image attachment</source>
         <translation>无法编码图片附件</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="838"/>
+        <location filename="../src/ui/noteeditor.cpp" line="943"/>
         <source>Failed to write encrypted image attachment</source>
         <translation>无法写入加密图片附件</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="845"/>
+        <location filename="../src/ui/noteeditor.cpp" line="950"/>
         <source>Failed to write image attachment</source>
         <translation>无法写入图片附件</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="964"/>
+        <location filename="../src/ui/noteeditor.cpp" line="1088"/>
         <source>Image preview %1 x %2</source>
         <translation>图片预览 %1 x %2</translation>
     </message>
     <message>
-        <location filename="../src/ui/noteeditor.cpp" line="984"/>
+        <location filename="../src/ui/noteeditor.cpp" line="1108"/>
         <source>Original size: %1 x %2</source>
         <translation>原始大小：%1 x %2</translation>
     </message>
@@ -375,17 +380,17 @@ Global encryption passwords have been set. Enter the same simple and recovery pa
 <context>
     <name>NoteListDelegate</name>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="61"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="63"/>
         <source>Locked</source>
         <translation>已锁定</translation>
     </message>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="61"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="63"/>
         <source>Encrypted</source>
         <translation>已加密</translation>
     </message>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="87"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="89"/>
         <source>Edited %1</source>
         <translation>编辑于 %1</translation>
     </message>
@@ -393,59 +398,59 @@ Global encryption passwords have been set. Enter the same simple and recovery pa
 <context>
     <name>NoteListPopup</name>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="114"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="116"/>
         <source>No notes yet</source>
         <translation>还没有便签</translation>
     </message>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="139"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="141"/>
         <source>Open selected</source>
         <translation>打开选中</translation>
     </message>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="140"/>
-        <location filename="../src/ui/notelistpopup.cpp" line="358"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="142"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="364"/>
         <source>Select</source>
         <translation>选择</translation>
     </message>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="141"/>
-        <location filename="../src/ui/notelistpopup.cpp" line="354"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="143"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="360"/>
         <source>Select all</source>
         <translation>全选</translation>
     </message>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="142"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="144"/>
         <source>Delete selected</source>
         <translation>删除选中</translation>
     </message>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="354"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="360"/>
         <source>Deselect all</source>
         <translation>全不选</translation>
     </message>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="357"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="363"/>
         <source>Done</source>
         <translation>完成</translation>
     </message>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="469"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="475"/>
         <source>Note is encrypted</source>
         <translation>便签已加密</translation>
     </message>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="470"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="476"/>
         <source>Encrypted notes must be unlocked in their window before renaming.</source>
         <translation>加密便签需要先在对应窗口里解锁后再修改标题。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="476"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="482"/>
         <source>Rename note</source>
         <translation>重命名便签</translation>
     </message>
     <message>
-        <location filename="../src/ui/notelistpopup.cpp" line="477"/>
+        <location filename="../src/ui/notelistpopup.cpp" line="483"/>
         <source>Note title</source>
         <translation>便签标题</translation>
     </message>
@@ -453,192 +458,214 @@ Global encryption passwords have been set. Enter the same simple and recovery pa
 <context>
     <name>NoteWindow</name>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="711"/>
+        <location filename="../src/ui/notewindow.cpp" line="194"/>
+        <source>This note is locked.
+
+After 3 failed attempts, the recovery password is required.
+The title is partially visible for identification. Use the unlock button in settings to continue.</source>
+        <translation>当前便签已锁定。
+
+连续输错 3 次后，必须输入复杂恢复密码。
+标题会保留部分内容便于辨认。请在设置中使用解锁按钮继续。</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/notewindow.cpp" line="199"/>
+        <source>This note is encrypted.
+
+Use the unlock button in settings and enter the simple password to unlock.
+Until unlocked, only a partial title is shown.</source>
+        <translation>当前便签已加密。
+
+请在设置中使用解锁按钮，并输入简单密码解锁。
+解锁前只显示部分标题。</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/notewindow.cpp" line="720"/>
         <source>Failed to set global passwords</source>
         <translation>设置全局密码失败</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="712"/>
+        <location filename="../src/ui/notewindow.cpp" line="721"/>
         <source>Global password error</source>
         <translation>全局密码错误</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="714"/>
+        <location filename="../src/ui/notewindow.cpp" line="723"/>
         <source>The current global encryption passwords cannot be used.</source>
         <translation>当前无法使用这套全局加密密码。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="725"/>
-        <location filename="../src/ui/notewindow.cpp" line="746"/>
+        <location filename="../src/ui/notewindow.cpp" line="734"/>
+        <location filename="../src/ui/notewindow.cpp" line="755"/>
         <source>Failed to enable encryption</source>
         <translation>启用加密失败</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="727"/>
+        <location filename="../src/ui/notewindow.cpp" line="736"/>
         <source>This note cannot be encrypted.</source>
         <translation>当前便签无法启用加密。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="748"/>
+        <location filename="../src/ui/notewindow.cpp" line="757"/>
         <source>Image attachments in this note cannot be encrypted.</source>
         <translation>当前便签图片附件无法完成加密。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="771"/>
+        <location filename="../src/ui/notewindow.cpp" line="780"/>
         <source>Failed to lock</source>
         <translation>锁定失败</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="772"/>
+        <location filename="../src/ui/notewindow.cpp" line="781"/>
         <source>This note cannot be locked.</source>
         <translation>当前便签无法完成锁定。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="821"/>
+        <location filename="../src/ui/notewindow.cpp" line="830"/>
         <source>Wrong password</source>
         <translation>密码错误</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="823"/>
+        <location filename="../src/ui/notewindow.cpp" line="832"/>
         <source>Recovery password is incorrect.</source>
         <translation>复杂恢复密码错误。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="824"/>
+        <location filename="../src/ui/notewindow.cpp" line="833"/>
         <source>Simple password is incorrect. %1 attempts remaining.</source>
         <translation>简单密码错误，还剩 %1 次机会。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="834"/>
+        <location filename="../src/ui/notewindow.cpp" line="843"/>
         <source>Note locked</source>
         <translation>便签已锁定</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="835"/>
+        <location filename="../src/ui/notewindow.cpp" line="844"/>
         <source>Simple password has been entered incorrectly 3 times. The recovery password is required.</source>
         <translation>简单密码已连续输错 3 次，必须输入复杂恢复密码。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="846"/>
+        <location filename="../src/ui/notewindow.cpp" line="855"/>
         <source>Failed to unlock</source>
         <translation>解锁失败</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="847"/>
+        <location filename="../src/ui/notewindow.cpp" line="856"/>
         <source>Failed to decrypt note.</source>
         <translation>便签密文无法解开。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="891"/>
+        <location filename="../src/ui/notewindow.cpp" line="900"/>
         <source>Failed to change simple password</source>
         <translation>修改短密码失败</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="893"/>
+        <location filename="../src/ui/notewindow.cpp" line="902"/>
         <source>Cannot change the simple password at this time.</source>
         <translation>当前无法修改短密码。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="899"/>
-        <location filename="../src/ui/notewindow.cpp" line="927"/>
+        <location filename="../src/ui/notewindow.cpp" line="908"/>
+        <location filename="../src/ui/notewindow.cpp" line="936"/>
         <source>Done</source>
         <translation>完成</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="900"/>
+        <location filename="../src/ui/notewindow.cpp" line="909"/>
         <source>Simple password updated.</source>
         <translation>短密码已更新。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="919"/>
+        <location filename="../src/ui/notewindow.cpp" line="928"/>
         <source>Failed to change recovery password</source>
         <translation>修改长密码失败</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="921"/>
+        <location filename="../src/ui/notewindow.cpp" line="930"/>
         <source>Cannot change the recovery password at this time.</source>
         <translation>当前无法修改长密码。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="928"/>
+        <location filename="../src/ui/notewindow.cpp" line="937"/>
         <source>Recovery password updated.</source>
         <translation>长密码已更新。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="937"/>
-        <location filename="../src/ui/notewindow.cpp" line="948"/>
+        <location filename="../src/ui/notewindow.cpp" line="946"/>
+        <location filename="../src/ui/notewindow.cpp" line="957"/>
         <source>Failed to remove encryption</source>
         <translation>取消加密失败</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="939"/>
+        <location filename="../src/ui/notewindow.cpp" line="948"/>
         <source>Image attachments cannot be reverted to plain storage.</source>
         <translation>当前便签图片附件无法转回普通存储。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="950"/>
+        <location filename="../src/ui/notewindow.cpp" line="959"/>
         <source>This note cannot be reverted to a plain note.</source>
         <translation>当前便签无法转回普通便签。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="1043"/>
+        <location filename="../src/ui/notewindow.cpp" line="1052"/>
         <source>Current note</source>
         <translation>当前便签</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="1044"/>
+        <location filename="../src/ui/notewindow.cpp" line="1053"/>
         <source>This cannot be undone:
 %1</source>
         <translation>删除后无法恢复：
 %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="1046"/>
+        <location filename="../src/ui/notewindow.cpp" line="1055"/>
         <source>This cannot be undone:
 %1 notes selected</source>
         <translation>删除后无法恢复：
 已选 %1 个便签</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="1050"/>
+        <location filename="../src/ui/notewindow.cpp" line="1059"/>
         <source>Confirm deletion</source>
         <translation>确认删除</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="1061"/>
         <location filename="../src/ui/notewindow.cpp" line="1070"/>
+        <location filename="../src/ui/notewindow.cpp" line="1079"/>
         <source>Failed to delete</source>
         <translation>删除失败</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="1062"/>
+        <location filename="../src/ui/notewindow.cpp" line="1071"/>
         <source>Some selected notes were not deleted. Please try again later.</source>
         <translation>选中的便签没有全部删除成功，请稍后重试。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="1071"/>
+        <location filename="../src/ui/notewindow.cpp" line="1080"/>
         <source>Failed to delete the current note. Please try again later.</source>
         <translation>当前便签删除失败，请稍后重试。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="1100"/>
-        <location filename="../src/ui/notewindow.cpp" line="1154"/>
-        <location filename="../src/ui/notewindow.cpp" line="1174"/>
+        <location filename="../src/ui/notewindow.cpp" line="1109"/>
+        <location filename="../src/ui/notewindow.cpp" line="1163"/>
+        <location filename="../src/ui/notewindow.cpp" line="1183"/>
         <source>Failed to save</source>
         <translation>保存失败</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="1102"/>
+        <location filename="../src/ui/notewindow.cpp" line="1111"/>
         <source>Failed to save encrypted note title.</source>
         <translation>加密便签标题保存失败。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="1155"/>
+        <location filename="../src/ui/notewindow.cpp" line="1164"/>
         <source>Failed to save image attachment.</source>
         <translation>图片附件保存失败。</translation>
     </message>
     <message>
-        <location filename="../src/ui/notewindow.cpp" line="1176"/>
+        <location filename="../src/ui/notewindow.cpp" line="1185"/>
         <source>Failed to save encrypted note content.</source>
         <translation>加密便签内容保存失败。</translation>
     </message>
@@ -696,201 +723,229 @@ Global encryption passwords have been set. Enter the same simple and recovery pa
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="301"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="310"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="305"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="314"/>
         <source>Note settings</source>
         <translation>便签设置</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="324"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="357"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="328"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="361"/>
         <source>Editor</source>
         <translation>编辑</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="325"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="394"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="329"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="398"/>
         <source>Startup</source>
         <translation>启动</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="326"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="424"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="330"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="428"/>
         <source>Security</source>
         <translation>安全</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="327"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="463"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="331"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="467"/>
         <source>Delete</source>
         <translation>删除</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="358"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="362"/>
         <source>Adjust editing behavior and font for the current note.</source>
         <translation>调整当前便签的编辑行为和全局字体。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="365"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="369"/>
         <source>Word wrap to window width</source>
         <translation>按窗口宽度自动换行</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="367"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="371"/>
         <source>Wrap</source>
         <translation>换行</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="370"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="374"/>
         <source>No recent fonts</source>
         <translation>暂无最近字体</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="371"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="375"/>
         <source>Recently used</source>
         <translation>最近使用</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="377"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="381"/>
         <source>Recent fonts</source>
         <translation>最近字体</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="384"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="388"/>
         <source>System font</source>
         <translation>系统字体</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="389"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="393"/>
         <source>Font size</source>
         <translation>字号</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="395"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="399"/>
         <source>Set note list sorting and the default note opened on application startup.</source>
         <translation>设置便签列表排序和应用启动时默认打开的便签。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="403"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="411"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="407"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="415"/>
         <source>Last edited</source>
         <translation>最后编辑</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="404"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="408"/>
         <source>Creation time</source>
         <translation>按创建时间</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="405"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="409"/>
         <source>Title</source>
         <translation>按标题</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="407"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="411"/>
         <source>List sorting</source>
         <translation>列表排序</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="410"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="414"/>
         <source>Last closed</source>
         <translation>最后关闭</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="412"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="416"/>
         <source>Last created</source>
         <translation>最后创建</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="415"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="419"/>
         <source>Default note on startup</source>
         <translation>启动默认便签</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="425"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="429"/>
         <source>Manage note encryption and global encryption passwords.</source>
         <translation>管理当前便签加密状态和全局加密密码。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="432"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="436"/>
         <source>Lock note</source>
         <translation>锁定当前便签</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="433"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="437"/>
         <source>Unlock note</source>
         <translation>解锁当前便签</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="436"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="440"/>
         <source>Encrypt note</source>
         <translation>加密当前便签</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="441"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="445"/>
         <source>Remove encryption</source>
         <translation>取消当前加密</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="445"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="449"/>
         <source>Please unlock the note before removing encryption.</source>
         <translation>请先解锁当前便签，再取消加密。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="450"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="454"/>
         <source>Change simple password</source>
         <translation>修改短密码</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="451"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="455"/>
         <source>Change recovery password</source>
         <translation>修改长密码</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="455"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="456"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="459"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="460"/>
         <source>Passwords can be changed after encryption is first enabled.</source>
         <translation>首次启用加密后才能修改密码。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="464"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="468"/>
         <source>Delete the current note. Confirmation is required.</source>
         <translation>删除当前便签。此操作需要再次确认。</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="466"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="470"/>
         <source>Delete note</source>
         <translation>删除当前便签</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="496"/>
-        <location filename="../src/ui/settingsdialog.cpp" line="529"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="500"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="533"/>
         <source>Current note</source>
         <translation>当前便签</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="500"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="504"/>
         <source>Confirm deletion</source>
         <translation>确认删除</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="501"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="505"/>
         <source>This cannot be undone:
 %1</source>
         <translation>删除后无法恢复：
 %1</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="533"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="537"/>
         <source>Confirm removing encryption</source>
         <translation>确认取消加密</translation>
     </message>
     <message>
-        <location filename="../src/ui/settingsdialog.cpp" line="534"/>
+        <location filename="../src/ui/settingsdialog.cpp" line="538"/>
         <source>After removing encryption, the note will be stored as plaintext in SQLite:
 %1</source>
         <translation>取消加密后，这条便签会转成普通便签，标题和正文将以明文写入 SQLite：
 %1</translation>
+    </message>
+</context>
+<context>
+    <name>ThemeCatalog</name>
+    <message>
+        <location filename="../src/theme/themecatalog.cpp" line="87"/>
+        <source>Paper</source>
+        <translation>纸张</translation>
+    </message>
+    <message>
+        <location filename="../src/theme/themecatalog.cpp" line="90"/>
+        <source>Mint</source>
+        <translation>薄荷</translation>
+    </message>
+    <message>
+        <location filename="../src/theme/themecatalog.cpp" line="93"/>
+        <source>Ocean</source>
+        <translation>海洋</translation>
+    </message>
+    <message>
+        <location filename="../src/theme/themecatalog.cpp" line="96"/>
+        <source>Rose</source>
+        <translation>玫瑰</translation>
+    </message>
+    <message>
+        <location filename="../src/theme/themecatalog.cpp" line="99"/>
+        <source>Graphite</source>
+        <translation>石墨</translation>
     </message>
 </context>
 <context>
@@ -1016,7 +1071,7 @@ Global encryption passwords have been set. Enter the same simple and recovery pa
 <context>
     <name>main</name>
     <message>
-        <location filename="../src/main.cpp" line="58"/>
+        <location filename="../src/main.cpp" line="65"/>
         <source>Initialization failed: %1</source>
         <translation>初始化失败：%1</translation>
     </message>
