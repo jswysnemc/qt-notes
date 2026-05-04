@@ -1,5 +1,5 @@
 pkgname=qt-notes
-pkgver=0.1.0
+pkgver=0.1.1
 pkgrel=1
 pkgdesc='Qt 6 desktop sticky notes application with per-note encryption'
 arch=('x86_64')
