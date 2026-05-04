@@ -12,6 +12,9 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+permissions:
+  contents: read
+
 jobs:
   linux:
     name: Linux Qt 6
@@ -53,3 +56,32 @@ jobs:
           name: qt-notes-linux-x86_64
           path: qt-notes-linux-x86_64.tar.gz
           if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: linux
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: qt-notes-linux-x86_64
+          path: dist
+
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          ASSET="dist/qt-notes-linux-x86_64.tar.gz"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ASSET" --clobber
+          else
+            gh release create "$TAG" "$ASSET" \
+              --title "$TAG" \
+              --notes "Automated release for $TAG."
+          fi
