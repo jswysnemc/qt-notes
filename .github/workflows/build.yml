@@ -8,6 +8,11 @@ on:
       - 'v*'
   pull_request:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Existing release tag to build and publish, for example v0.1.2'
+        required: false
+        type: string
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -24,6 +29,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
 
       - name: Install dependencies
         run: |
@@ -60,7 +67,7 @@ jobs:
   release:
     name: Publish GitHub Release
     needs: linux
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -68,6 +75,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
 
       - name: Download release artifact
         uses: actions/download-artifact@v4
@@ -78,7 +87,7 @@ jobs:
       - name: Create or update release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ inputs.release_tag || github.ref_name }}
         run: |
           ASSET="dist/qt-notes-linux-x86_64.tar.gz"
           if gh release view "$TAG" >/dev/null 2>&1; then
